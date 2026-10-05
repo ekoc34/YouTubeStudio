@@ -64,3 +64,5 @@ export * from './strategistAnalysis';
 export * from './trendAnalysis';
 export * from './trendingResearchInput';
 export * from './trendingResearchInputContentType';
+export * from './youTubeUnavailableResponse';
+export * from './youTubeVideoDetail';

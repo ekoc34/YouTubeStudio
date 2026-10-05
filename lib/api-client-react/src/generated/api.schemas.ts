@@ -273,6 +273,7 @@ export interface ResearchSession {
   /** @nullable */
   errorMessage: string | null;
   createdAt: string;
+  updatedAt: string;
   /** @nullable */
   retrievedAt: string | null;
 }
@@ -280,6 +281,28 @@ export interface ResearchSession {
 export interface ResearchVideo {
   id: string;
   sessionId: string;
+  videoId: string;
+  title: string;
+  channelId: string;
+  channelTitle: string;
+  /** @nullable */
+  publishedAt: string | null;
+  /** @nullable */
+  durationSeconds: number | null;
+  url: string;
+  /** @nullable */
+  thumbnailUrl: string | null;
+  /** @nullable */
+  viewCount: number | null;
+  /** @nullable */
+  likeCount: number | null;
+  /** @nullable */
+  commentCount: number | null;
+  dataSource: string;
+  retrievedAt: string;
+}
+
+export interface YouTubeVideoDetail {
   videoId: string;
   title: string;
   channelId: string;
@@ -670,6 +693,11 @@ export type ConflictResponse = ErrorResponse;
  * The configured AI provider is unavailable
  */
 export type AIUnavailableResponse = ErrorResponse;
+
+/**
+ * YouTube Data API is not configured or is unavailable
+ */
+export type YouTubeUnavailableResponse = ErrorResponse;
 
 /**
  * YouTube Data API request failed

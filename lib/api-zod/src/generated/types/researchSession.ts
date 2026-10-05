@@ -20,6 +20,7 @@ export interface ResearchSession {
   /** @nullable */
   errorMessage: string | null;
   createdAt: Date;
+  updatedAt: Date;
   /** @nullable */
   retrievedAt: Date | null;
 }

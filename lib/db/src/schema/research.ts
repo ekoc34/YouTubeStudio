@@ -63,6 +63,9 @@ export const researchSessionsTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     retrievedAt: timestamp("retrieved_at", { withTimezone: true }),
   },
   (table) => [index("research_sessions_created_at_idx").on(table.createdAt)],

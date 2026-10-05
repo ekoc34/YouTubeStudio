@@ -18,6 +18,7 @@ import { Link, Route, Switch, useLocation, useParams } from 'wouter';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ErrorBoundary } from '@/components/error-boundary';
+import ResearchPage from './ResearchPage';
 
 const queryClient = new QueryClient();
 const ideaStatuses: IdeaStatus[] = ['NEW', 'RESEARCHING', 'APPROVED', 'REJECTED', 'SCRIPTING', 'READY'];
@@ -38,7 +39,7 @@ function App() {
 function Shell() {
   const [location] = useLocation();
   const [mobileNav, setMobileNav] = useState(false);
-  const title = location.startsWith('/ideas') ? 'Ideas' : location.startsWith('/strategist') ? 'Strategist' :
+  const title = location.startsWith('/research') ? 'Research' : location.startsWith('/ideas') ? 'Ideas' : location.startsWith('/strategist') ? 'Strategist' :
     location.startsWith('/scripts') ? 'Scripts' : location.startsWith('/projects') ? 'Projects' : 'Overview';
   return <div className="studio-layout min-h-[100dvh]">
     <aside className={`sidebar ${mobileNav ? 'sidebar-open' : ''}`}>
@@ -48,6 +49,7 @@ function Shell() {
       <nav className="main-nav">
         <NavItem href="/" active={location === '/' || location === '/dashboard'} icon={<Gauge size={17} />} label="Overview" />
         <NavItem href="/ideas" active={location.startsWith('/ideas')} icon={<Lightbulb size={17} />} label="Ideas" />
+        <NavItem href="/research" active={location.startsWith('/research')} icon={<Search size={17} />} label="Research" />
         <NavItem href="/strategist" active={location.startsWith('/strategist')} icon={<Sparkles size={17} />} label="Strategist" />
         <NavItem href="/scripts" active={location.startsWith('/scripts')} icon={<Clapperboard size={17} />} label="Scripts" />
         <NavItem href="/projects" active={location.startsWith('/projects')} icon={<FolderKanban size={17} />} label="Projects" />
@@ -66,6 +68,7 @@ function Shell() {
           <Route path="/ideas" component={IdeasPage} />
           <Route path="/ideas/new" component={NewIdeaPage} />
           <Route path="/ideas/:id" component={IdeaPage} />
+          <Route path="/research" component={ResearchPage} />
           <Route path="/strategist" component={StrategistPage} />
           <Route path="/scripts" component={ScriptsPage} />
           <Route path="/scripts/:id" component={ScriptPage} />

@@ -54,7 +54,9 @@ import type {
   ShortsScript,
   StrategistAnalysis,
   TrendAnalysis,
-  TrendingResearchInput
+  TrendingResearchInput,
+  YouTubeUnavailableResponse,
+  YouTubeVideoDetail
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -981,6 +983,94 @@ export function useListResearchSessions<TData = Awaited<ReturnType<typeof listRe
 
 
 
+export const getCreateResearchSessionUrl = () => {
+
+
+
+
+  return `/api/research/sessions`
+}
+
+/**
+ * @summary Create a research session with validated search filters
+ */
+export const createResearchSession = async (researchSearchInput: ResearchSearchInput, options?: Parameters<typeof customFetch>[1]): Promise<ResearchSession> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ResearchSession>(getCreateResearchSessionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(researchSearchInput)
+  }
+);}
+
+
+
+
+
+export const getCreateResearchSessionMutationKey = () => ['createResearchSession'] as const;
+
+export const getCreateResearchSessionMutationOptions = <TError = ErrorType<BadRequestResponse | YouTubeUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createResearchSession>>, TError,CreateResearchSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createResearchSession>>, TError,CreateResearchSessionMutationVariables, TContext> => {
+
+const mutationKey = getCreateResearchSessionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createResearchSession>>, CreateResearchSessionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createResearchSession(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateResearchSessionMutationResult = NonNullable<Awaited<ReturnType<typeof createResearchSession>>>
+    export type CreateResearchSessionMutationBody = BodyType<ResearchSearchInput>
+    export type CreateResearchSessionMutationError = ErrorType<BadRequestResponse | YouTubeUnavailableResponse>
+    export type CreateResearchSessionMutationVariables = {data: BodyType<ResearchSearchInput>}
+
+    /**
+ * @summary Create a research session with validated search filters
+ */
+export const useCreateResearchSession = <TError = ErrorType<BadRequestResponse | YouTubeUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createResearchSession>>, TError,CreateResearchSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createResearchSession>>,
+        TError,
+        CreateResearchSessionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateResearchSessionMutationOptions(options));
+    }
+
 export const getGetResearchSessionUrl = (id: string,) => {
 
 
@@ -1058,6 +1148,80 @@ export function useGetResearchSession<TData = Awaited<ReturnType<typeof getResea
 
 
 
+export const getSearchResearchSessionUrl = (id: string,) => {
+
+
+
+
+  return `/api/research/sessions/${id}/search`
+}
+
+/**
+ * @summary Search YouTube using a saved research session
+ */
+export const searchResearchSession = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<ResearchSessionDetail> => {
+
+  return customFetch<ResearchSessionDetail>(getSearchResearchSessionUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchResearchSessionMutationKey = () => ['searchResearchSession'] as const;
+
+export const getSearchResearchSessionMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof searchResearchSession>>, TError,SearchResearchSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof searchResearchSession>>, TError,SearchResearchSessionMutationVariables, TContext> => {
+
+const mutationKey = getSearchResearchSessionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof searchResearchSession>>, SearchResearchSessionMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  searchResearchSession(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SearchResearchSessionMutationResult = NonNullable<Awaited<ReturnType<typeof searchResearchSession>>>
+
+    export type SearchResearchSessionMutationError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>
+    export type SearchResearchSessionMutationVariables = {id: string}
+
+    /**
+ * @summary Search YouTube using a saved research session
+ */
+export const useSearchResearchSession = <TError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof searchResearchSession>>, TError,SearchResearchSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof searchResearchSession>>,
+        TError,
+        SearchResearchSessionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSearchResearchSessionMutationOptions(options));
+    }
+
 export const getSearchResearchUrl = () => {
 
 
@@ -1100,7 +1264,7 @@ return customFetch<ResearchSessionDetail>(getSearchResearchUrl(),
 
 export const getSearchResearchMutationKey = () => ['searchResearch'] as const;
 
-export const getSearchResearchMutationOptions = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+export const getSearchResearchMutationOptions = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof searchResearch>>, TError,SearchResearchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof searchResearch>>, TError,SearchResearchMutationVariables, TContext> => {
 
@@ -1129,13 +1293,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type SearchResearchMutationResult = NonNullable<Awaited<ReturnType<typeof searchResearch>>>
     export type SearchResearchMutationBody = BodyType<ResearchSearchInput>
-    export type SearchResearchMutationError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>
+    export type SearchResearchMutationError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>
     export type SearchResearchMutationVariables = {data: BodyType<ResearchSearchInput>}
 
     /**
  * @summary Search real YouTube videos and save a research session
  */
-export const useSearchResearch = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+export const useSearchResearch = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof searchResearch>>, TError,SearchResearchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof searchResearch>>,
@@ -1145,6 +1309,83 @@ export const useSearchResearch = <TError = ErrorType<BadRequestResponse | Extern
       > => {
       return useMutation(getSearchResearchMutationOptions(options));
     }
+
+export const getGetResearchVideoDetailsUrl = (videoId: string,) => {
+
+
+
+
+  return `/api/research/videos/${videoId}`
+}
+
+/**
+ * @summary Retrieve public details for a YouTube video
+ */
+export const getResearchVideoDetails = async (videoId: string, options?: Parameters<typeof customFetch>[1]): Promise<YouTubeVideoDetail> => {
+
+  return customFetch<YouTubeVideoDetail>(getGetResearchVideoDetailsUrl(videoId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetResearchVideoDetailsQueryKey = (videoId: string,) => {
+    return [
+    `/api/research/videos/${videoId}`
+    ] as const;
+    }
+
+
+export const getGetResearchVideoDetailsQueryOptions = <TData = Awaited<ReturnType<typeof getResearchVideoDetails>>, TError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>>(videoId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getResearchVideoDetails>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetResearchVideoDetailsQueryKey(videoId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getResearchVideoDetails>>> = ({ signal }) => getResearchVideoDetails(videoId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: videoId !== null && videoId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getResearchVideoDetails>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetResearchVideoDetailsQueryResult = NonNullable<Awaited<ReturnType<typeof getResearchVideoDetails>>>
+export type GetResearchVideoDetailsQueryError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>
+
+
+/**
+ * @summary Retrieve public details for a YouTube video
+ */
+
+export function useGetResearchVideoDetails<TData = Awaited<ReturnType<typeof getResearchVideoDetails>>, TError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>>(
+ videoId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getResearchVideoDetails>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetResearchVideoDetailsQueryOptions(videoId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetTrendingResearchUrl = () => {
 
@@ -1276,7 +1517,7 @@ return customFetch<ResearchSessionDetail>(getResearchChannelUrl(),
 
 export const getResearchChannelMutationKey = () => ['researchChannel'] as const;
 
-export const getResearchChannelMutationOptions = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+export const getResearchChannelMutationOptions = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof researchChannel>>, TError,ResearchChannelMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof researchChannel>>, TError,ResearchChannelMutationVariables, TContext> => {
 
@@ -1305,13 +1546,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ResearchChannelMutationResult = NonNullable<Awaited<ReturnType<typeof researchChannel>>>
     export type ResearchChannelMutationBody = BodyType<ChannelResearchInput>
-    export type ResearchChannelMutationError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>
+    export type ResearchChannelMutationError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>
     export type ResearchChannelMutationVariables = {data: BodyType<ChannelResearchInput>}
 
     /**
  * @summary Fetch a channel and its recent public videos
  */
-export const useResearchChannel = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+export const useResearchChannel = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | YouTubeUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof researchChannel>>, TError,ResearchChannelMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof researchChannel>>,

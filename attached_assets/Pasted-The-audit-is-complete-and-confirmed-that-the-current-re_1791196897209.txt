@@ -1,0 +1,187 @@
+The audit is complete and confirmed that the current repository contains no Research backend handlers, Research tests, or completed YouTube Research implementation.
+
+Now begin Phase 2A of the YouTube Content Studio.
+
+IMPORTANT:
+Implement ONLY the foundation in this task.
+Do not implement trend analysis, opportunity scoring, competitor analysis, video generation, or YouTube uploading yet.
+
+Do not modify or break the existing Dashboard, Ideas, Projects, Script Studio, or OpenAI provider.
+
+## Phase 2A — YouTube Research Foundation
+
+### 1. Database
+
+Extend the existing PostgreSQL schema with the minimum models needed for YouTube research:
+
+* ResearchSession
+* ResearchVideo
+* ResearchChannel
+
+Use proper relationships and timestamps.
+
+ResearchSession should store:
+
+* id
+* search query
+* language
+* region
+* content type
+* time range
+* status
+* createdAt
+* updatedAt
+
+ResearchVideo should store available real data:
+
+* id
+* researchSessionId
+* YouTube video ID
+* title
+* channel ID
+* channel name
+* publishedAt
+* duration if available
+* viewCount if available
+* likeCount if available
+* commentCount if available
+* thumbnail URL
+* video URL
+* data source
+* fetchedAt
+
+ResearchChannel should store available real data:
+
+* id
+* YouTube channel ID
+* channel name
+* subscriber count if available
+* total view count if available
+* video count if available
+* thumbnail URL
+* fetchedAt
+
+Do not duplicate existing models unnecessarily.
+
+Create and run the required database migration safely.
+
+### 2. YouTube provider abstraction
+
+Create a modular YouTubeResearchProvider interface/service.
+
+It must support these operations:
+
+* searchVideos()
+* getVideoDetails()
+* getChannelDetails()
+
+Do not hard-code the application directly into route handlers.
+
+Use environment variables / Replit Secrets for YouTube credentials.
+
+Expected secret:
+
+YOUTUBE_API_KEY
+
+Never expose this key to frontend code.
+
+### 3. Configuration state
+
+If YOUTUBE_API_KEY is missing:
+
+* The application must still start normally.
+* Research functionality should show a clear configuration state.
+* Do NOT use fake videos or fake statistics.
+* Do NOT generate fake trending data.
+
+Example message:
+
+"YouTube Data API is not configured."
+
+### 4. Research API
+
+Create backend endpoints for:
+
+* creating a research session
+* searching YouTube videos
+* retrieving video details
+* retrieving channel details
+* retrieving a previous research session
+
+Validate all incoming parameters.
+
+Handle API errors cleanly.
+
+Do not return secrets.
+
+### 5. Research UI foundation
+
+Add a Research page to the existing navigation.
+
+Create:
+
+* Search/topic input
+* Language selector
+* Region selector
+* Content type selector
+* Time range selector
+* Research button
+
+For now, display real search results from the backend.
+
+Show:
+
+* thumbnail
+* title
+* channel
+* publication date
+* views when available
+* likes when available
+* comments when available
+* duration when available
+
+Unavailable metrics must display "Unavailable".
+
+### 6. Security
+
+Do not expose:
+
+* YOUTUBE_API_KEY
+* OPENAI_API_KEY
+* database credentials
+
+to frontend code.
+
+Use backend/server-side calls only.
+
+### 7. Verification
+
+After implementation:
+
+* Run typecheck
+* Run database migration
+* Test API endpoints
+* Test missing YOUTUBE_API_KEY state
+* Test Research UI
+* Verify existing Dashboard
+* Verify Ideas
+* Verify Projects
+* Verify Script Studio
+* Verify OpenAI provider
+
+Do not make paid AI requests just for verification.
+
+Do not implement fake data.
+
+Do not publish the application.
+
+At the end report:
+
+1. Files changed
+2. Database changes
+3. API endpoints added
+4. Secrets required
+5. Tests performed
+6. Any remaining limitations
+
+Only implement Phase 2A.

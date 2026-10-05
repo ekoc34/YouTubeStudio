@@ -214,6 +214,27 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ResearchSession"
+    post:
+      operationId: createResearchSession
+      tags: [research]
+      summary: Create a research session with validated search filters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResearchSearchInput"
+      responses:
+        "201":
+          description: Research session ready to search
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          $ref: "#/components/responses/YouTubeUnavailable"
   /research/sessions/{id}:
     parameters:
       - name: id
@@ -228,13 +249,40 @@ paths:
       summary: Open a saved research session
       responses:
         "200":
-          description: Saved session, real video records, analysis, and opportunities
+          description: Saved session with its real video records and optional channel details
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ResearchSessionDetail"
         "404":
           $ref: "#/components/responses/NotFound"
+  /research/sessions/{id}/search:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: searchResearchSession
+      tags: [research]
+      summary: Search YouTube using a saved research session
+      responses:
+        "200":
+          description: Completed search and its real results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchSessionDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "502":
+          $ref: "#/components/responses/ExternalServiceError"
+        "503":
+          $ref: "#/components/responses/YouTubeUnavailable"
   /research/search:
     post:
       operationId: searchResearch
@@ -258,7 +306,34 @@ paths:
         "502":
           $ref: "#/components/responses/ExternalServiceError"
         "503":
-          $ref: "#/components/responses/AIUnavailable"
+          $ref: "#/components/responses/YouTubeUnavailable"
+  /research/videos/{videoId}:
+    parameters:
+      - name: videoId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: "^[A-Za-z0-9_-]{11}$"
+    get:
+      operationId: getResearchVideoDetails
+      tags: [research]
+      summary: Retrieve public details for a YouTube video
+      responses:
+        "200":
+          description: Real video details returned by the YouTube Data API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/YouTubeVideoDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "502":
+          $ref: "#/components/responses/ExternalServiceError"
+        "503":
+          $ref: "#/components/responses/YouTubeUnavailable"
   /research/trending:
     post:
       operationId: getTrendingResearch
@@ -306,7 +381,7 @@ paths:
         "502":
           $ref: "#/components/responses/ExternalServiceError"
         "503":
-          $ref: "#/components/responses/AIUnavailable"
+          $ref: "#/components/responses/YouTubeUnavailable"
   /research/sessions/{id}/analyze:
     parameters:
       - name: id
@@ -690,6 +765,12 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+    YouTubeUnavailable:
+      description: YouTube Data API is not configured or is unavailable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
     ExternalServiceError:
       description: YouTube Data API request failed
       content:
@@ -865,8 +946,9 @@ components:
         dataSource: { type: string }
         errorMessage: { type: ["string", "null"] }
         createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
         retrievedAt: { type: ["string", "null"], format: date-time }
-      required: [id, kind, query, filters, status, resultCount, dataSource, errorMessage, createdAt, retrievedAt]
+      required: [id, kind, query, filters, status, resultCount, dataSource, errorMessage, createdAt, updatedAt, retrievedAt]
     ResearchVideo:
       type: object
       properties:
@@ -886,6 +968,23 @@ components:
         dataSource: { type: string }
         retrievedAt: { type: string, format: date-time }
       required: [id, sessionId, videoId, title, channelId, channelTitle, publishedAt, durationSeconds, url, thumbnailUrl, viewCount, likeCount, commentCount, dataSource, retrievedAt]
+    YouTubeVideoDetail:
+      type: object
+      properties:
+        videoId: { type: string }
+        title: { type: string }
+        channelId: { type: string }
+        channelTitle: { type: string }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        durationSeconds: { type: ["integer", "null"] }
+        url: { type: string, format: uri }
+        thumbnailUrl: { type: ["string", "null"], format: uri }
+        viewCount: { type: ["integer", "null"] }
+        likeCount: { type: ["integer", "null"] }
+        commentCount: { type: ["integer", "null"] }
+        dataSource: { type: string }
+        retrievedAt: { type: string, format: date-time }
+      required: [videoId, title, channelId, channelTitle, publishedAt, durationSeconds, url, thumbnailUrl, viewCount, likeCount, commentCount, dataSource, retrievedAt]
     ResearchChannel:
       type: object
       properties:

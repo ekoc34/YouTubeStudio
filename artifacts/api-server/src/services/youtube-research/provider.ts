@@ -36,6 +36,7 @@ export type YouTubeSearchInput = {
   region: string;
   language: string;
   publishedAfter?: string;
+  publishedBefore?: string;
 };
 
 export interface YouTubeResearchProvider {
@@ -103,11 +104,7 @@ type VideoListResponse = {
 type SearchListResponse = {
   items?: Array<{
     id?: { videoId?: string };
-    snippet?: VideoListResponse["items"] extends Array<infer T>
-      ? T extends { snippet?: infer S }
-        ? S
-        : never
-      : never;
+    snippet?: NonNullable<VideoListResponse["items"]>[number]["snippet"];
   }>;
 };
 
@@ -203,9 +200,7 @@ export class YouTubeDataApiProvider implements YouTubeResearchProvider {
       response = await fetch(url, { signal: AbortSignal.timeout(15_000) });
     } catch (error) {
       throw new YouTubeDataApiError(
-        error instanceof Error
-          ? `YouTube Data API could not be reached: ${error.message}`
-          : "YouTube Data API could not be reached.",
+        "YouTube Data API could not be reached.",
         502,
       );
     }
@@ -236,6 +231,9 @@ export class YouTubeDataApiProvider implements YouTubeResearchProvider {
       relevanceLanguage: input.language,
       ...(input.publishedAfter
         ? { publishedAfter: input.publishedAfter }
+        : {}),
+      ...(input.publishedBefore
+        ? { publishedBefore: input.publishedBefore }
         : {}),
     });
 
@@ -448,4 +446,8 @@ function parseChannelReference(
     "That channel URL format cannot be resolved by the YouTube Data API. Use a channel ID, /@handle, or /user/username URL.",
     400,
   );
+}
+
+export function validateYouTubeChannelReference(input: string): void {
+  parseChannelReference(input);
 }
