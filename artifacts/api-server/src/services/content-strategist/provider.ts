@@ -60,13 +60,42 @@ export class OpenAIProvider implements StructuredAIProvider {
       ],
     });
 
-    const content = response.choices[0]?.message.content;
-    if (!content) {
-      throw new Error("The AI provider returned an empty response.");
+    const firstChoice =
+      response && typeof response === "object" && Array.isArray(response.choices)
+        ? response.choices[0]
+        : undefined;
+    const message =
+      firstChoice && typeof firstChoice === "object"
+        ? firstChoice.message
+        : undefined;
+    const content =
+      message && typeof message === "object" ? message.content : undefined;
+    if (typeof content !== "string" || content.length === 0) {
+      throw new AIProviderRequestError(
+        "openrouter",
+        "OpenRouter returned an empty or unsupported structured response. Retry or choose a different OPENROUTER_MODEL.",
+      );
     }
 
     return request.schema.parse(JSON.parse(content) as unknown);
   }
+}
+
+function configuredAIProviderName(): string {
+  return (
+    process.env.AI_PROVIDER?.trim() ||
+    process.env.CONTENT_STRATEGIST_PROVIDER?.trim() ||
+    "openai"
+  ).toLowerCase();
+}
+
+export function isAIProviderConfigured(): boolean {
+  const providerName = configuredAIProviderName();
+  if (providerName === "openai") return Boolean(process.env.OPENAI_API_KEY);
+  if (providerName === "openrouter") {
+    return Boolean(process.env.OPENROUTER_API_KEY);
+  }
+  return false;
 }
 
 function openRouterErrorMetadata(error: unknown): {
@@ -91,9 +120,14 @@ function openRouterErrorMetadata(error: unknown): {
 function toOpenRouterRequestError(error: unknown): AIProviderRequestError {
   const { status, code } = openRouterErrorMetadata(error);
   const normalizedCode = code?.toLowerCase() ?? "";
+  const timedOut =
+    error instanceof Error && /timeout/i.test(error.name);
   let message: string;
 
-  if (status === 401 || status === 403) {
+  if (timedOut) {
+    message =
+      "OpenRouter did not respond before the request timed out. Retry later or choose a responsive OPENROUTER_MODEL.";
+  } else if (status === 401 || status === 403) {
     message =
       "OpenRouter could not authenticate this request. Check that OPENROUTER_API_KEY is configured correctly.";
   } else if (
@@ -119,7 +153,7 @@ function toOpenRouterRequestError(error: unknown): AIProviderRequestError {
   return new AIProviderRequestError("openrouter", message, status, code);
 }
 
-// This router selects a currently available free model that supports the requested response features.
+// OpenRouter's free router selects an available model supporting the requested structured-output parameters.
 export const DEFAULT_OPENROUTER_MODEL = "openrouter/free";
 
 export class OpenRouterProvider implements StructuredAIProvider {
@@ -131,6 +165,7 @@ export class OpenRouterProvider implements StructuredAIProvider {
       apiKey,
       baseURL: "https://openrouter.ai/api/v1",
       maxRetries: 0,
+      timeout: 120_000,
     });
     this.model = model;
   }
@@ -141,9 +176,16 @@ export class OpenRouterProvider implements StructuredAIProvider {
       const { $schema: _schemaVersion, ...jsonSchema } = z.toJSONSchema(
         request.schema,
       );
+      const openRouterProviderOptions = {
+        provider: { require_parameters: true },
+        ...(this.model === "qwen/qwen3.8-27b:free"
+          ? { reasoning: { effort: "low" } }
+          : {}),
+      };
       response = await this.client.chat.completions.create({
+        ...openRouterProviderOptions,
         model: this.model,
-        max_tokens: 8192,
+        max_tokens: 4096,
         response_format: {
           type: "json_schema",
           json_schema: {
@@ -174,10 +216,7 @@ export class OpenRouterProvider implements StructuredAIProvider {
 }
 
 export function createStructuredAIProvider(): StructuredAIProvider {
-  const providerName =
-    process.env.AI_PROVIDER?.trim() ||
-    process.env.CONTENT_STRATEGIST_PROVIDER?.trim() ||
-    "openai";
+  const providerName = configuredAIProviderName();
 
   if (providerName === "openrouter") {
     const apiKey = process.env.OPENROUTER_API_KEY;

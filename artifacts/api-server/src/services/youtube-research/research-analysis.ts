@@ -348,6 +348,8 @@ async function generateAnalysis(
         "Create original opportunities, not rewrites or direct copies of the researched videos. For each opportunity explain the observed approaches, what appears saturated, and how the proposed idea differs.",
         "Opportunity scores are AI estimates based on this dataset, not YouTube metrics, rankings, virality probabilities, or guarantees. Explain the score and set confidence honestly.",
         "When fewer than 10 videos are supplied, mark dataSufficiency LIMITED and say conclusions are tentative.",
+        "Keep the response concise: provide at most 2 findings per category, use empty arrays when the sample does not support a finding, and keep each text field to one or two concise sentences.",
+        "Use no more than 3 sourceVideoIds per finding or opportunity. Generate up to 3 distinct opportunities, only when supported by the saved sample.",
         "Return JSON with analysis and opportunities. The analysis object must include summary, dataSufficiency, sufficiencyNote, frequentTopics, recurringTopics, recurringFormats, commonTitlePatterns, commonHookPatterns, commonKeywords, durationPatterns, audienceSignals, saturationSignals, contentGaps, and analysisLabel.",
         "Each finding must contain insight, evidence, sourceVideoIds, and confidence. Each opportunity must contain topic, suggestedTitle, suggestedHook, whyInteresting, targetAudience, suggestedFormat, suggestedDurationSeconds, competitionLevel, observedPatterns, saturationEvidence, originalityAngle, potentialScore, scoreReason, confidence, evidence, sourceVideoIds, and originalityConsiderations.",
       ].join(" "),

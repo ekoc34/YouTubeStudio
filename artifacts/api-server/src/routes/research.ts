@@ -21,6 +21,7 @@ import {
 } from "@workspace/api-zod";
 import {
   AIConfigurationError,
+  isAIProviderConfigured,
 } from "../services/content-strategist/provider";
 import {
   isYouTubeConfigured,
@@ -153,7 +154,7 @@ router.get("/research/status", (_req, res) => {
   res.json(
     GetResearchStatusResponse.parse({
       youtubeConfigured: isYouTubeConfigured(),
-      aiConfigured: Boolean(process.env.OPENAI_API_KEY),
+      aiConfigured: isAIProviderConfigured(),
     }),
   );
 });
