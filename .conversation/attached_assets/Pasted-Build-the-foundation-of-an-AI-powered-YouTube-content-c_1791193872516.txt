@@ -1,0 +1,168 @@
+Build the foundation of an AI-powered YouTube content creation platform.
+
+IMPORTANT:
+The primary purpose of this application is to autonomously create YouTube content. Do not build a generic personal assistant. The entire product should be focused on YouTube content creation.
+
+The AI should eventually be able to:
+
+1. Research YouTube trends and topics.
+2. Analyze competing videos and formats.
+3. Generate original video ideas.
+4. Score ideas for viral potential.
+5. Write complete scripts.
+6. Break scripts into visual scenes.
+7. Generate or request AI images/video for each scene.
+8. Generate voice narration.
+9. Assemble videos into vertical YouTube Shorts.
+10. Generate subtitles.
+11. Generate titles, descriptions and hashtags.
+12. Review the finished video and improve it if necessary.
+13. Upload finished videos to YouTube.
+14. Analyze published video performance.
+15. Learn from analytics and improve future content.
+
+For this first version, DO NOT implement video generation or YouTube uploading yet.
+
+Build the foundation first.
+
+TECH STACK:
+
+* Use a modern full-stack web application.
+* Use a relational database.
+* Use a clean modular architecture.
+* Use environment variables / Replit Secrets for API keys.
+* Never expose API keys in frontend code.
+
+CREATE THESE MAIN SECTIONS:
+
+1. Dashboard
+   Show:
+
+* Videos created
+* Videos published
+* Ideas generated
+* Current production jobs
+* Recent performance
+
+2. Ideas
+   Create an idea management system.
+
+Each idea should contain:
+
+* title
+* topic
+* hook
+* description
+* target audience
+* format
+* estimated duration
+* viral score
+* originality score
+* status
+* created_at
+
+Statuses:
+
+* NEW
+* RESEARCHING
+* APPROVED
+* REJECTED
+* SCRIPTING
+* READY
+
+3. AI Content Strategist
+
+Create an AI service abstraction called ContentStrategist.
+
+It should be able to:
+
+* generate content ideas
+* generate hooks
+* score ideas
+* explain why an idea could perform well
+* identify weak ideas
+* suggest improvements
+
+Do not hardcode the AI provider.
+Create a provider interface so OpenAI, Anthropic or other models can be connected later.
+
+4. Script Studio
+
+Allow selecting an idea and generating a complete Shorts script.
+
+A script should contain:
+
+* hook
+* narration
+* scene list
+* visual instructions
+* on-screen text
+* sound/music suggestions
+* CTA
+
+The user must be able to edit the generated script before approving it.
+
+5. Content Projects
+
+Create a project system connecting:
+
+Idea → Script → Scenes → Assets → Video → YouTube upload
+
+Use unique IDs and database relationships.
+
+6. Production Status
+
+Each content project should have:
+
+IDEA
+RESEARCH
+SCRIPT
+SCENES
+MEDIA
+VOICE
+EDIT
+QUALITY_CHECK
+READY
+UPLOADED
+PUBLISHED
+FAILED
+
+7. UI
+
+Create a clean dark dashboard designed specifically for a YouTube creator.
+
+Make it practical rather than decorative.
+
+The dashboard should make it possible to understand the entire production pipeline at a glance.
+
+8. Future architecture
+
+Design the code so we can later add these modules without rewriting the application:
+
+* YouTube Research Agent
+* Trend Agent
+* Script Agent
+* Image Generation Agent
+* Video Generation Agent
+* Voice Agent
+* Editing Agent
+* Thumbnail Agent
+* Quality Control Agent
+* YouTube Publishing Agent
+* Analytics Agent
+* Learning Agent
+
+For now, only implement:
+
+* Dashboard
+* Ideas
+* Content Strategist
+* Script Studio
+* Content Projects
+* Database
+* AI provider abstraction
+
+Do not add fake integrations.
+Do not pretend that video generation or YouTube uploading works yet.
+
+After completing this first stage, show me the working application and explain what was implemented.
