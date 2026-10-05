@@ -1,0 +1,65 @@
+Investigate and fix the Phase 2B "Analyze saved results" HTTP 502 error.
+
+Important:
+
+* Do NOT redesign or remove Phase 2A.
+* Do NOT replace real YouTube data with mock/fake data.
+* Do NOT weaken validation just to make the request succeed.
+* Do NOT expose or print OPENAI_API_KEY or YOUTUBE_API_KEY.
+* Preserve the existing OpenAI provider abstraction and Phase 2B architecture.
+
+The environment now has:
+
+* OPENAI_API_KEY configured in Replit Secrets
+* YOUTUBE_API_KEY configured in Replit Secrets
+* Real YouTube research searches are working and returning real videos.
+
+Reproduce the exact failing flow using an existing saved ResearchSession.
+
+Then trace the request from:
+Analyze saved results
+→ Phase 2B API route
+→ research session retrieval
+→ AI analysis service/provider
+→ structured output parsing/validation
+→ database persistence
+→ response.
+
+Find the actual underlying exception causing the HTTP 502.
+
+Check specifically for:
+
+1. OpenAI provider configuration/model initialization errors.
+2. Incorrect environment variable access.
+3. Invalid request payload sent to the OpenAI API.
+4. Model/API compatibility issues.
+5. Structured JSON/schema parsing failures.
+6. Token/input size problems caused by sending too much research data.
+7. Database persistence or schema errors after successful AI generation.
+8. Error handling that converts the real exception into a generic 502.
+
+Use the existing real saved ResearchSession data for the investigation.
+
+After identifying the root cause, make the smallest safe fix necessary.
+
+Then verify all of the following:
+
+* Analyze saved results succeeds with real YouTube research data.
+* The AI analysis is persisted successfully.
+* A second analysis of the same saved session behaves according to the existing deduplication/re-analysis design and does not unnecessarily duplicate data or AI calls.
+* Opportunity Finder results are generated from the actual saved research data.
+* Create Idea still works.
+* Phase 2A YouTube search, saved sessions, video details, and channel research still work.
+* Typecheck passes.
+* Build passes.
+* No secrets are logged or exposed.
+
+Finally, report:
+
+* the root cause of the 502,
+* the exact files changed,
+* the fix made,
+* the verification results,
+* and whether any additional manual acceptance test is still required.
+
+Do not stop at "AI analysis could not be completed." The goal is to identify the underlying error and fix it.

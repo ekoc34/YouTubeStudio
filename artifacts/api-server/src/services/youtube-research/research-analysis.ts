@@ -14,6 +14,7 @@ import {
   researchSourcesTable,
   researchVideosTable,
 } from "@workspace/db";
+import { logger } from "../../lib/logger";
 import {
   AIConfigurationError,
   createStructuredAIProvider,
@@ -94,11 +95,75 @@ export class ResearchAIProviderError extends Error {
   }
 }
 
+export class ResearchAIQuotaError extends Error {
+  constructor() {
+    super(
+      "AI analysis is unavailable because the OpenAI API account has no remaining credits. Add API credits, then retry.",
+    );
+    this.name = "ResearchAIQuotaError";
+  }
+}
+
 export class ResearchAIOutputError extends Error {
   constructor() {
     super("The AI provider returned invalid structured analysis. Re-analyze the session to try again.");
     this.name = "ResearchAIOutputError";
   }
+}
+
+function sanitizeProviderErrorMessage(message: string): string {
+  return message
+    .replace(/\bsk-[A-Za-z0-9_-]{8,}\b/g, "[redacted]")
+    .replace(/\bBearer\s+\S+/gi, "Bearer [redacted]")
+    .replace(
+      /\b(?:api[_-]?key|authorization)\s*[:=]\s*['"]?[^,\s'"]+/gi,
+      "credential=[redacted]",
+    )
+    .slice(0, 500);
+}
+
+function summarizeProviderError(error: unknown): Record<string, unknown> {
+  if (!(error instanceof Error)) {
+    return { errorName: "NonErrorThrown" };
+  }
+
+  const providerError = error as Error & {
+    code?: unknown;
+    param?: unknown;
+    status?: unknown;
+    type?: unknown;
+  };
+  return {
+    errorName: error.name,
+    message: sanitizeProviderErrorMessage(error.message),
+    ...(typeof providerError.status === "number"
+      ? { status: providerError.status }
+      : {}),
+    ...(typeof providerError.code === "string"
+      ? { code: providerError.code }
+      : {}),
+    ...(typeof providerError.type === "string"
+      ? { type: providerError.type }
+      : {}),
+    ...(typeof providerError.param === "string"
+      ? { param: providerError.param }
+      : {}),
+  };
+}
+
+function isOpenAIQuotaError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const providerError = error as {
+    code?: unknown;
+    status?: unknown;
+    type?: unknown;
+  };
+  return (
+    providerError.status === 429 &&
+    (providerError.code === "credit_balance_exhausted" ||
+      providerError.code === "insufficient_quota" ||
+      providerError.type === "insufficient_quota")
+  );
 }
 
 const activeAnalyses = new Map<string, Promise<ResearchSessionDetail>>();
@@ -175,6 +240,10 @@ async function generateAnalysis(
     provider = createStructuredAIProvider();
   } catch (error) {
     if (error instanceof AIConfigurationError) throw error;
+    logger.error(
+      { providerError: summarizeProviderError(error), videoCount: videos.length },
+      "Structured AI provider could not be initialized",
+    );
     throw new ResearchAIProviderError();
   }
 
@@ -217,6 +286,27 @@ async function generateAnalysis(
     });
   } catch (error) {
     if (error instanceof AIConfigurationError) throw error;
+    if (isOpenAIQuotaError(error)) {
+      logger.warn(
+        { providerError: summarizeProviderError(error), videoCount: videos.length },
+        "OpenAI analysis unavailable because API credits are exhausted",
+      );
+      throw new ResearchAIQuotaError();
+    }
+    if (
+      error instanceof SyntaxError ||
+      (error instanceof Error && error.name === "ZodError")
+    ) {
+      logger.warn(
+        { outputError: summarizeProviderError(error), videoCount: videos.length },
+        "Structured AI output could not be parsed or validated",
+      );
+      throw new ResearchAIOutputError();
+    }
+    logger.error(
+      { providerError: summarizeProviderError(error), videoCount: videos.length },
+      "Structured AI provider request failed",
+    );
     throw new ResearchAIProviderError();
   }
 

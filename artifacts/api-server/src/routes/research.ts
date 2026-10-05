@@ -33,6 +33,7 @@ import {
 import {
   ResearchAIOutputError,
   ResearchAIProviderError,
+  ResearchAIQuotaError,
   analyzeResearchSession,
   listSessionOpportunities,
 } from "../services/youtube-research/research-analysis";
@@ -98,6 +99,10 @@ function sendAnalysisError(res: Response, error: unknown): void {
     res.status(503).json({
       error: "AI analysis is not configured. Add OPENAI_API_KEY through Replit Secrets to analyze trends.",
     });
+    return;
+  }
+  if (error instanceof ResearchAIQuotaError) {
+    res.status(503).json({ error: error.message });
     return;
   }
   if (
