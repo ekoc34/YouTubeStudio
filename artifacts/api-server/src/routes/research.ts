@@ -1,6 +1,11 @@
 import { Router, type IRouter, type Response } from "express";
 import {
+  AnalyzeResearchSessionBody,
+  AnalyzeResearchSessionResponse,
   CreateResearchSessionResponse,
+  CreateIdeaFromResearchBody,
+  CreateIdeaFromResearchResponse,
+  GenerateResearchOpportunitiesResponse,
   GetResearchSessionParams,
   GetResearchSessionResponse,
   GetResearchVideoDetailsParams,
@@ -15,6 +20,9 @@ import {
   SearchResearchSessionResponse,
 } from "@workspace/api-zod";
 import {
+  AIConfigurationError,
+} from "../services/content-strategist/provider";
+import {
   isYouTubeConfigured,
   YouTubeConfigurationError,
   YouTubeDataApiError,
@@ -23,9 +31,16 @@ import {
   validateYouTubeChannelReference,
 } from "../services/youtube-research/provider";
 import {
+  ResearchAIOutputError,
+  ResearchAIProviderError,
+  analyzeResearchSession,
+  listSessionOpportunities,
+} from "../services/youtube-research/research-analysis";
+import {
   ResearchInputError,
   ResearchSessionKindError,
   ResearchSessionNotFoundError,
+  ResearchOpportunityNotFoundError,
   validateResearchSearchInput,
   youtubeResearchService,
 } from "../services/youtube-research/research-service";
@@ -37,7 +52,10 @@ function sendResearchError(
   res: Response,
   error: unknown,
 ): void {
-  if (error instanceof ResearchSessionNotFoundError) {
+  if (
+    error instanceof ResearchSessionNotFoundError ||
+    error instanceof ResearchOpportunityNotFoundError
+  ) {
     res.status(404).json({ error: error.message });
     return;
   }
@@ -59,6 +77,39 @@ function sendResearchError(
   }
   console.error("YouTube research request failed", error);
   res.status(500).json({ error: "Research could not be completed." });
+}
+
+function sendAnalysisError(res: Response, error: unknown): void {
+  if (
+    error instanceof ResearchSessionNotFoundError ||
+    error instanceof ResearchOpportunityNotFoundError
+  ) {
+    res.status(404).json({ error: error.message });
+    return;
+  }
+  if (
+    error instanceof ResearchInputError ||
+    error instanceof ResearchSessionKindError
+  ) {
+    res.status(400).json({ error: error.message });
+    return;
+  }
+  if (error instanceof AIConfigurationError) {
+    res.status(503).json({
+      error: "AI analysis is not configured. Add OPENAI_API_KEY through Replit Secrets to analyze trends.",
+    });
+    return;
+  }
+  if (
+    error instanceof ResearchAIProviderError ||
+    error instanceof ResearchAIOutputError
+  ) {
+    console.error("Research analysis failed", error);
+    res.status(502).json({ error: error.message });
+    return;
+  }
+  console.error("Research analysis request failed", error);
+  res.status(500).json({ error: "Research analysis could not be completed." });
 }
 
 function normalizedSearchInput(
@@ -175,6 +226,46 @@ router.get("/research/sessions/:id", async (req, res): Promise<void> => {
   }
 });
 
+router.post("/research/sessions/:id/analyze", async (req, res): Promise<void> => {
+  const params = GetResearchSessionParams.safeParse(req.params);
+  const body = AnalyzeResearchSessionBody.safeParse(req.body ?? {});
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+  if (!body.success) {
+    res.status(400).json({ error: body.error.message });
+    return;
+  }
+
+  try {
+    const detail = await analyzeResearchSession(
+      params.data.id,
+      body.data.force ?? false,
+    );
+    res.json(AnalyzeResearchSessionResponse.parse(detail));
+  } catch (error) {
+    sendAnalysisError(res, error);
+  }
+});
+
+router.post(
+  "/research/sessions/:id/opportunities",
+  async (req, res): Promise<void> => {
+    const params = GetResearchSessionParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+    try {
+      const opportunities = await listSessionOpportunities(params.data.id);
+      res.json(GenerateResearchOpportunitiesResponse.parse(opportunities));
+    } catch (error) {
+      sendAnalysisError(res, error);
+    }
+  },
+);
+
 router.post("/research/search", async (req, res): Promise<void> => {
   const body = normalizedSearchInput(req.body);
   if (!body.success) {
@@ -267,6 +358,23 @@ router.post("/research/channels", async (req, res): Promise<void> => {
     res.status(201).json(ResearchChannelResponse.parse(detail));
   } catch (error) {
     sendResearchError(res, error);
+  }
+});
+
+router.post("/research/create-idea", async (req, res): Promise<void> => {
+  const body = CreateIdeaFromResearchBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ error: body.error.message });
+    return;
+  }
+  try {
+    const idea = await youtubeResearchService.createIdeaFromOpportunity(
+      body.data.sessionId,
+      body.data.sourceId,
+    );
+    res.status(201).json(CreateIdeaFromResearchResponse.parse(idea));
+  } catch (error) {
+    sendAnalysisError(res, error);
   }
 });
 

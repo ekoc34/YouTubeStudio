@@ -5,6 +5,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
@@ -38,6 +39,11 @@ export const ideasTable = pgTable("content_ideas", {
   weaknesses: text("weaknesses").array().notNull().default([]),
   improvements: text("improvements").array().notNull().default([]),
   opportunityScore: integer("opportunity_score"),
+  researchSessionId: uuid("research_session_id"),
+  researchOpportunityId: uuid("research_opportunity_id"),
+  researchSourceVideoIds: text("research_source_video_ids").array()
+    .notNull()
+    .default([]),
   researchEvidence: text("research_evidence"),
   originalityConsiderations: text("originality_considerations")
     .array()
@@ -47,7 +53,11 @@ export const ideasTable = pgTable("content_ideas", {
   status: ideaStatusEnum("status").notNull().default("NEW"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
-});
+}, (table) => [
+  uniqueIndex("content_ideas_research_opportunity_idx").on(
+    table.researchOpportunityId,
+  ),
+]);
 
 export const insertIdeaSchema = createInsertSchema(ideasTable).omit({
   id: true,

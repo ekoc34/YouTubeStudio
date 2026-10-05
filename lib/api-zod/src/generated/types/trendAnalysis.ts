@@ -6,17 +6,21 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { EvidenceFinding } from './evidenceFinding';
+import type { TrendAnalysisDataSufficiency } from './trendAnalysisDataSufficiency';
 
 export interface TrendAnalysis {
   summary: string;
+  dataSufficiency: TrendAnalysisDataSufficiency;
+  sufficiencyNote: string;
   frequentTopics: EvidenceFinding[];
-  risingTopics: EvidenceFinding[];
-  repeatedFormats: EvidenceFinding[];
-  commonHooks: EvidenceFinding[];
-  lengthPatterns: string[];
-  titleStructures: EvidenceFinding[];
+  recurringTopics: EvidenceFinding[];
+  recurringFormats: EvidenceFinding[];
+  commonTitlePatterns: EvidenceFinding[];
+  commonHookPatterns: EvidenceFinding[];
+  commonKeywords: EvidenceFinding[];
+  durationPatterns: EvidenceFinding[];
+  audienceSignals: EvidenceFinding[];
+  saturationSignals: EvidenceFinding[];
   contentGaps: EvidenceFinding[];
-  audienceInterests: EvidenceFinding[];
-  originalOpportunities: EvidenceFinding[];
   analysisLabel: string;
 }

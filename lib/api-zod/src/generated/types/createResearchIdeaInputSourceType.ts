@@ -10,6 +10,5 @@ export type CreateResearchIdeaInputSourceType = typeof CreateResearchIdeaInputSo
 
 
 export const CreateResearchIdeaInputSourceType = {
-  VIDEO: 'VIDEO',
   OPPORTUNITY: 'OPPORTUNITY',
 } as const;

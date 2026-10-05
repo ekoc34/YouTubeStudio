@@ -1,8 +1,12 @@
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import {
+  contentOpportunitiesTable,
   db,
+  ideasTable,
   researchChannelsTable,
+  researchAnalysesTable,
   researchSessionsTable,
+  researchSourcesTable,
   researchVideosTable,
   type ResearchFilters,
 } from "@workspace/db";
@@ -36,6 +40,13 @@ export class ResearchSessionKindError extends Error {
   constructor() {
     super("Only topic-search sessions can be searched.");
     this.name = "ResearchSessionKindError";
+  }
+}
+
+export class ResearchOpportunityNotFoundError extends Error {
+  constructor() {
+    super("Research opportunity not found.");
+    this.name = "ResearchOpportunityNotFoundError";
   }
 }
 
@@ -342,7 +353,7 @@ export class YouTubeResearchService {
       .limit(1);
     if (!session) return null;
 
-    const [videos, channels] = await Promise.all([
+    const [videos, channels, analyses, opportunityRows] = await Promise.all([
       db
         .select()
         .from(researchVideosTable)
@@ -353,8 +364,45 @@ export class YouTubeResearchService {
         .from(researchChannelsTable)
         .where(eq(researchChannelsTable.sessionId, sessionId))
         .limit(1),
+      db
+        .select()
+        .from(researchAnalysesTable)
+        .where(
+          and(
+            eq(researchAnalysesTable.sessionId, sessionId),
+            eq(researchAnalysesTable.kind, "TREND"),
+          ),
+        )
+        .limit(1),
+      db
+        .select()
+        .from(contentOpportunitiesTable)
+        .where(eq(contentOpportunitiesTable.sessionId, sessionId))
+        .orderBy(desc(contentOpportunitiesTable.potentialScore)),
     ]);
     const channel = channels[0];
+    const opportunitySources =
+      opportunityRows.length > 0
+        ? await db
+            .select()
+            .from(researchSourcesTable)
+            .where(
+              inArray(
+                researchSourcesTable.opportunityId,
+                opportunityRows.map((opportunity) => opportunity.id),
+              ),
+            )
+        : [];
+    const sourcesByOpportunityId = new Map<
+      string,
+      (typeof opportunitySources)[number][]
+    >();
+    for (const source of opportunitySources) {
+      if (!source.opportunityId) continue;
+      const existing = sourcesByOpportunityId.get(source.opportunityId) ?? [];
+      existing.push(source);
+      sourcesByOpportunityId.set(source.opportunityId, existing);
+    }
     const viewCounts = videos.flatMap((video) =>
       video.viewCount == null ? [] : [video.viewCount],
     );
@@ -374,10 +422,118 @@ export class YouTubeResearchService {
             averageViewsSampleSize: viewCounts.length,
           }
         : null,
-      trendAnalysis: null,
+      trendAnalysis: analyses[0]
+        ? (analyses[0].result as unknown as Record<string, unknown>)
+        : null,
       channelAnalysis: null,
-      opportunities: [],
+      opportunities: opportunityRows.map((opportunity) => {
+        const sourceVideos = sourcesByOpportunityId.get(opportunity.id) ?? [];
+        return {
+          ...opportunity,
+          sourceVideos,
+          sourceVideoIds: sourceVideos.flatMap((source) =>
+            source.videoId ? [source.videoId] : [],
+          ),
+          scoreLabel: "AI Opportunity Score",
+        };
+      }),
     };
+  }
+
+  async createIdeaFromOpportunity(sessionId: string, opportunityId: string) {
+    const [opportunity] = await db
+      .select()
+      .from(contentOpportunitiesTable)
+      .where(
+        and(
+          eq(contentOpportunitiesTable.id, opportunityId),
+          eq(contentOpportunitiesTable.sessionId, sessionId),
+        ),
+      )
+      .limit(1);
+    if (!opportunity) throw new ResearchOpportunityNotFoundError();
+
+    const sourceRows = await db
+      .select()
+      .from(researchSourcesTable)
+      .where(eq(researchSourcesTable.opportunityId, opportunity.id));
+    if (sourceRows.length === 0) {
+      throw new ResearchInputError(
+        "This opportunity has no saved YouTube source videos and cannot be added to Ideas.",
+      );
+    }
+
+    const now = new Date();
+    return db.transaction(async (tx) => {
+      const [idea] = await tx
+        .insert(ideasTable)
+        .values({
+          title: opportunity.suggestedTitle,
+          topic: opportunity.topic,
+          hook: opportunity.suggestedHook,
+          description: `${opportunity.whyInteresting}\n\nOriginality angle: ${opportunity.originalityAngle}`,
+          targetAudience: opportunity.targetAudience,
+          format: opportunity.suggestedFormat,
+          estimatedDuration: opportunity.suggestedDurationSeconds,
+          viralScore: null,
+          originalityScore: null,
+          rationale: opportunity.scoreReason,
+          weaknesses: [opportunity.saturationEvidence],
+          improvements: [opportunity.originalityAngle],
+          opportunityScore: opportunity.potentialScore,
+          researchSessionId: opportunity.sessionId,
+          researchOpportunityId: opportunity.id,
+          researchSourceVideoIds: sourceRows.flatMap((source) =>
+            source.videoId ? [source.videoId] : [],
+          ),
+          researchEvidence: opportunity.evidence,
+          originalityConsiderations: [
+            ...opportunity.originalityConsiderations,
+            `Observed patterns: ${opportunity.observedPatterns}`,
+            `Saturation evidence: ${opportunity.saturationEvidence}`,
+            `Originality angle: ${opportunity.originalityAngle}`,
+          ],
+          source: "RESEARCH",
+          status: "NEW",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoNothing({
+          target: ideasTable.researchOpportunityId,
+        })
+        .returning();
+
+      if (!idea) {
+        const [existingIdea] = await tx
+          .select()
+          .from(ideasTable)
+          .where(eq(ideasTable.researchOpportunityId, opportunity.id))
+          .limit(1);
+        if (!existingIdea) throw new Error("Idea could not be saved.");
+        return existingIdea;
+      }
+
+      await tx.insert(researchSourcesTable).values(
+        sourceRows.map((source) => ({
+          researchVideoId: source.researchVideoId,
+          opportunityId: null,
+          ideaId: idea.id,
+          videoId: source.videoId,
+          title: source.title,
+          channelId: source.channelId,
+          channelTitle: source.channelTitle,
+          publishedAt: source.publishedAt,
+          url: source.url,
+          viewCount: source.viewCount,
+          likeCount: source.likeCount,
+          commentCount: source.commentCount,
+          dataSource: source.dataSource,
+          retrievedAt: source.retrievedAt,
+        })),
+      );
+
+      return idea;
+    });
   }
 
   async researchChannel(channelUrlOrId: string) {

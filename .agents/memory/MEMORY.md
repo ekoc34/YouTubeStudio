@@ -1,0 +1,2 @@
+- [YouTube Studio scope](youtube-studio-scope.md) — Keep the product focused on research and ideas; avoid creation, editing, upload, or publishing features.
+- [OpenAPI mutation flags](openapi-mutation-flags.md) — Model optional POST controls in request bodies when query parameters collide in generated Orval types.

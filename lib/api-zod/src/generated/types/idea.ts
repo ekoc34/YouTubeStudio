@@ -40,6 +40,11 @@ export interface Idea {
      */
   opportunityScore: number | null;
   /** @nullable */
+  researchSessionId: string | null;
+  /** @nullable */
+  researchOpportunityId: string | null;
+  researchSourceVideoIds: string[];
+  /** @nullable */
   researchEvidence: string | null;
   originalityConsiderations: string[];
   source: IdeaSource;

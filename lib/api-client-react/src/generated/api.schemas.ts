@@ -92,6 +92,11 @@ export interface Idea {
      */
   opportunityScore: number | null;
   /** @nullable */
+  researchSessionId: string | null;
+  /** @nullable */
+  researchOpportunityId: string | null;
+  researchSourceVideoIds: string[];
+  /** @nullable */
   researchEvidence: string | null;
   originalityConsiderations: string[];
   source: IdeaSource;
@@ -363,17 +368,29 @@ export interface EvidenceFinding {
   confidence: Confidence;
 }
 
+export type TrendAnalysisDataSufficiency = typeof TrendAnalysisDataSufficiency[keyof typeof TrendAnalysisDataSufficiency];
+
+
+export const TrendAnalysisDataSufficiency = {
+  INSUFFICIENT: 'INSUFFICIENT',
+  LIMITED: 'LIMITED',
+  ADEQUATE: 'ADEQUATE',
+} as const;
+
 export interface TrendAnalysis {
   summary: string;
+  dataSufficiency: TrendAnalysisDataSufficiency;
+  sufficiencyNote: string;
   frequentTopics: EvidenceFinding[];
-  risingTopics: EvidenceFinding[];
-  repeatedFormats: EvidenceFinding[];
-  commonHooks: EvidenceFinding[];
-  lengthPatterns: string[];
-  titleStructures: EvidenceFinding[];
+  recurringTopics: EvidenceFinding[];
+  recurringFormats: EvidenceFinding[];
+  commonTitlePatterns: EvidenceFinding[];
+  commonHookPatterns: EvidenceFinding[];
+  commonKeywords: EvidenceFinding[];
+  durationPatterns: EvidenceFinding[];
+  audienceSignals: EvidenceFinding[];
+  saturationSignals: EvidenceFinding[];
   contentGaps: EvidenceFinding[];
-  audienceInterests: EvidenceFinding[];
-  originalOpportunities: EvidenceFinding[];
   analysisLabel: string;
 }
 
@@ -423,8 +440,18 @@ export interface ContentOpportunity {
   id: string;
   sessionId: string;
   topic: string;
+  suggestedTitle: string;
+  targetAudience: string;
+  /**
+     * @minimum 10
+     * @maximum 180
+     */
+  suggestedDurationSeconds: number;
   evidence: string;
   whyInteresting: string;
+  observedPatterns: string;
+  saturationEvidence: string;
+  originalityAngle: string;
   competitionLevel: ContentOpportunityCompetitionLevel;
   suggestedFormat: string;
   suggestedHook: string;
@@ -435,6 +462,7 @@ export interface ContentOpportunity {
   potentialScore: number;
   scoreReason: string;
   confidence: Confidence;
+  sourceVideoIds: string[];
   originalityConsiderations: string[];
   sourceVideos: ResearchSource[];
   scoreLabel: string;
@@ -518,11 +546,14 @@ export interface ChannelResearchInput {
   channelUrlOrId: string;
 }
 
+export interface ResearchAnalysisInput {
+  force?: boolean;
+}
+
 export type CreateResearchIdeaInputSourceType = typeof CreateResearchIdeaInputSourceType[keyof typeof CreateResearchIdeaInputSourceType];
 
 
 export const CreateResearchIdeaInputSourceType = {
-  VIDEO: 'VIDEO',
   OPPORTUNITY: 'OPPORTUNITY',
 } as const;
 

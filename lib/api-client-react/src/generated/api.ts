@@ -45,6 +45,7 @@ import type {
   ProjectInput,
   ProjectStatusUpdate,
   ProjectUpdate,
+  ResearchAnalysisInput,
   ResearchSearchInput,
   ResearchSession,
   ResearchSessionDetail,
@@ -53,7 +54,6 @@ import type {
   ScriptUpdate,
   ShortsScript,
   StrategistAnalysis,
-  TrendAnalysis,
   TrendingResearchInput,
   YouTubeUnavailableResponse,
   YouTubeVideoDetail
@@ -1574,14 +1574,29 @@ export const getAnalyzeResearchSessionUrl = (id: string,) => {
 /**
  * @summary Analyze a saved search using only its real YouTube results
  */
-export const analyzeResearchSession = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<TrendAnalysis> => {
+export const analyzeResearchSession = async (id: string,
+    researchAnalysisInput?: ResearchAnalysisInput, options?: Parameters<typeof customFetch>[1]): Promise<ResearchSessionDetail> => {
 
-  return customFetch<TrendAnalysis>(getAnalyzeResearchSessionUrl(id),
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ResearchSessionDetail>(getAnalyzeResearchSessionUrl(id),
   {
     ...options,
-    method: 'POST'
-
-
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(researchAnalysisInput)
   }
 );}
 
@@ -1591,7 +1606,7 @@ export const analyzeResearchSession = async (id: string, options?: Parameters<ty
 
 export const getAnalyzeResearchSessionMutationKey = () => ['analyzeResearchSession'] as const;
 
-export const getAnalyzeResearchSessionMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+export const getAnalyzeResearchSessionMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeResearchSession>>, TError,AnalyzeResearchSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof analyzeResearchSession>>, TError,AnalyzeResearchSessionMutationVariables, TContext> => {
 
@@ -1606,9 +1621,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof analyzeResearchSession>>, AnalyzeResearchSessionMutationVariables> = (props) => {
-          const {id} = props ?? {};
+          const {id,data} = props ?? {};
 
-          return  analyzeResearchSession(id,requestOptions)
+          return  analyzeResearchSession(id,data,requestOptions)
         }
 
 
@@ -1619,14 +1634,14 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type AnalyzeResearchSessionMutationResult = NonNullable<Awaited<ReturnType<typeof analyzeResearchSession>>>
-
-    export type AnalyzeResearchSessionMutationError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>
-    export type AnalyzeResearchSessionMutationVariables = {id: string}
+    export type AnalyzeResearchSessionMutationBody = BodyType<ResearchAnalysisInput> | undefined
+    export type AnalyzeResearchSessionMutationError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | AIUnavailableResponse>
+    export type AnalyzeResearchSessionMutationVariables = {id: string;data?: BodyType<ResearchAnalysisInput>}
 
     /**
  * @summary Analyze a saved search using only its real YouTube results
  */
-export const useAnalyzeResearchSession = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+export const useAnalyzeResearchSession = <TError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeResearchSession>>, TError,AnalyzeResearchSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof analyzeResearchSession>>,
@@ -1665,7 +1680,7 @@ export const generateResearchOpportunities = async (id: string, options?: Parame
 
 export const getGenerateResearchOpportunitiesMutationKey = () => ['generateResearchOpportunities'] as const;
 
-export const getGenerateResearchOpportunitiesMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+export const getGenerateResearchOpportunitiesMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateResearchOpportunities>>, TError,GenerateResearchOpportunitiesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof generateResearchOpportunities>>, TError,GenerateResearchOpportunitiesMutationVariables, TContext> => {
 
@@ -1694,13 +1709,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type GenerateResearchOpportunitiesMutationResult = NonNullable<Awaited<ReturnType<typeof generateResearchOpportunities>>>
 
-    export type GenerateResearchOpportunitiesMutationError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>
+    export type GenerateResearchOpportunitiesMutationError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | AIUnavailableResponse>
     export type GenerateResearchOpportunitiesMutationVariables = {id: string}
 
     /**
  * @summary Generate original content opportunities from saved YouTube results
  */
-export const useGenerateResearchOpportunities = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+export const useGenerateResearchOpportunities = <TError = ErrorType<BadRequestResponse | NotFoundResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateResearchOpportunities>>, TError,GenerateResearchOpportunitiesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof generateResearchOpportunities>>,
@@ -1794,7 +1809,7 @@ export const getCreateIdeaFromResearchUrl = () => {
 }
 
 /**
- * @summary Create a normal Ideas-library record from a saved video or opportunity
+ * @summary Create a normal Ideas-library record from a saved opportunity
  */
 export const createIdeaFromResearch = async (createResearchIdeaInput: CreateResearchIdeaInput, options?: Parameters<typeof customFetch>[1]): Promise<Idea> => {
 
@@ -1860,7 +1875,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type CreateIdeaFromResearchMutationVariables = {data: BodyType<CreateResearchIdeaInput>}
 
     /**
- * @summary Create a normal Ideas-library record from a saved video or opportunity
+ * @summary Create a normal Ideas-library record from a saved opportunity
  */
 export const useCreateIdeaFromResearch = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createIdeaFromResearch>>, TError,CreateIdeaFromResearchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}

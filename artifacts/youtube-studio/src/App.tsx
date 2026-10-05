@@ -6,12 +6,13 @@ import {
   useUpdateProject, useDeleteProject, useUpdateProjectStatus, useListScripts,
   useGenerateScript, useGetScript, useUpdateScript, useApproveScript,
   getGetDashboardQueryKey, getListIdeasQueryKey,
+  getGetIdeaResearchSourcesQueryKey, useGetIdeaResearchSources,
   getListProjectsQueryKey, getGetProjectQueryKey, getListScriptsQueryKey,
 } from '@workspace/api-client-react';
-import type { Idea, IdeaInput, IdeaStatus, ProjectStatus, ScriptScene } from '@workspace/api-client-react';
+import type { Idea, IdeaInput, IdeaStatus, ProjectStatus, ResearchSource, ScriptScene } from '@workspace/api-client-react';
 import {
   Activity, ArrowLeft, ArrowRight, BarChart3, Check, CheckCircle2, ChevronDown,
-  CircleAlert, Clapperboard, Clock3, Film, FolderKanban, Gauge, Lightbulb, LoaderCircle,
+  CircleAlert, Clapperboard, Clock3, ExternalLink, Film, FolderKanban, Gauge, Lightbulb, LoaderCircle,
   Menu, MoreHorizontal, Pencil, Plus, Search, Sparkles, Trash2, Youtube, X,
 } from 'lucide-react';
 import { Link, Route, Switch, useLocation, useParams } from 'wouter';
@@ -93,7 +94,7 @@ function Button({ children, variant = 'secondary', ...props }: { children: React
 }
 function Status({ children, kind = 'neutral' }: { children: ReactNode; kind?: string }) { return <span className={`status status-${kind.toLowerCase().replaceAll('_', '-')}`}>{children}</span>; }
 function statusKind(status: string) { return ['READY', 'APPROVED', 'PUBLISHED'].includes(status) ? 'good' : ['FAILED', 'REJECTED'].includes(status) ? 'bad' : ['SCRIPT', 'SCENES', 'SCRIPTING', 'RESEARCHING'].includes(status) ? 'amber' : 'neutral'; }
-function Panel({ children, className = '' }: { children: ReactNode; className?: string }) { return <section className={`panel ${className}`}>{children}</section>; }
+function Panel({ children, className = '', testId }: { children: ReactNode; className?: string; testId?: string }) { return <section className={`panel ${className}`} data-testid={testId}>{children}</section>; }
 function Loading({ label = 'Loading workspace' }: { label?: string }) { return <div className="loading-state"><div className="skeleton-line wide" /><div className="skeleton-line" /><span>{label}</span></div>; }
 function ErrorState({ onRetry }: { onRetry: () => void }) { return <div className="empty-state"><CircleAlert size={22} /><h3>Couldn’t load this view</h3><p>Check your connection and try again.</p><Button onClick={onRetry}>Retry</Button></div>; }
 function EmptyState({ title, text, action }: { title: string; text: string; action?: ReactNode }) { return <div className="empty-state"><span className="empty-icon"><Film size={22} /></span><h3>{title}</h3><p>{text}</p>{action}</div>; }
@@ -218,7 +219,8 @@ function IdeaPage() {
   const analysis = analyze.data;
   return <div className="page-enter"><Link href="/ideas" className="back-link"><ArrowLeft size={15} /> Idea library</Link>
     <PageHeading eyebrow={`IDEA / ${idea.topic.toUpperCase()}`} title={idea.title} description={idea.description || 'A promising premise, ready for a closer look.'} action={<div className="heading-actions"><Button onClick={() => analyze.mutate({ data: { ideaId: idea.id } })} disabled={analyze.isPending} testId="button-analyze-idea"><Sparkles size={15} /> {analyze.isPending ? 'Analyzing…' : 'Analyze idea'}</Button><Button variant="primary" onClick={() => createProject.mutate({ data: { ideaId: idea.id } }, { onSuccess: p => { refresh(); setLocation(`/projects/${p.id}`); } })} disabled={createProject.isPending} testId="button-create-project"><Plus size={15} /> Create project</Button></div>} />
-    <div className="detail-grid"><div className="detail-main"><Panel className="hook-panel"><div className="eyebrow">OPENING HOOK</div><blockquote>{idea.hook}</blockquote><div className="hook-meta"><span>{idea.format}</span><span>{idea.estimatedDuration}s estimated</span><span>For {idea.targetAudience}</span></div></Panel>
+     <div className="detail-grid"><div className="detail-main"><Panel className="hook-panel"><div className="eyebrow">OPENING HOOK</div><blockquote>{idea.hook}</blockquote><div className="hook-meta"><span>{idea.format}</span><span>{idea.estimatedDuration}s estimated</span><span>For {idea.targetAudience}</span></div></Panel>
+       {idea.researchSessionId && <IdeaResearchSources ideaId={idea.id} />}
       <Panel><div className="panel-heading"><div><div className="eyebrow">STRATEGIST REVIEW</div><h2>Make the premise sharper</h2></div><Button onClick={() => analyze.mutate({ data: { ideaId: idea.id } })} disabled={analyze.isPending} testId="button-rerun-analysis"><Activity size={14} /> Re-analyze</Button></div>
         {analysis ? <div className="analysis-content"><p className="analysis-explanation">{analysis.explanation}</p><div className="analysis-scores"><Score label="Viral potential" score={analysis.viralScore} /><Score label="Originality" score={analysis.originalityScore} /></div><InsightList title="Hook alternatives" items={analysis.hookOptions} /><InsightList title="Weak spots" items={analysis.weaknesses} /><InsightList title="Ways to improve" items={analysis.improvements} /></div> :
         <div className="analysis-content">{idea.rationale && <p className="analysis-explanation">{idea.rationale}</p>}<div className="analysis-scores"><Score label="Viral potential" score={idea.viralScore} /><Score label="Originality" score={idea.originalityScore} /></div><InsightList title="Weak spots" items={idea.weaknesses} /><InsightList title="Ways to improve" items={idea.improvements} />{!idea.rationale && !idea.weaknesses.length && <p className="muted">Run an analysis to get a concrete critique and ways to improve the angle.</p>}</div>}
@@ -231,6 +233,41 @@ function IdeaPage() {
 function Score({ label, score }: { label: string; score: number | null }) { return <div className="score-box"><span>{label}</span><b>{score ?? '—'}<small>{score === null ? '' : '/100'}</small></b><div className="score-track"><i style={{ width: `${score ?? 0}%` }} /></div></div>; }
 function InsightList({ title, items }: { title: string; items: string[] }) { return items.length ? <div className="insight-list"><h3>{title}</h3><ul>{items.map((item, i) => <li key={i}>{item}</li>)}</ul></div> : null; }
 function InfoLine({ label, value }: { label: string; value: string }) { return <div className="info-line"><span>{label}</span><b>{value}</b></div>; }
+function RealMetric({ label, value }: { label: string; value: number | null }) {
+  return <span className="idea-source-metric"><b>{value === null ? 'Unavailable' : new Intl.NumberFormat().format(value)}</b><small>{label}</small></span>;
+}
+function IdeaResearchSources({ ideaId }: { ideaId: string }) {
+  const sources = useGetIdeaResearchSources(ideaId, {
+    query: {
+      enabled: Boolean(ideaId),
+      queryKey: getGetIdeaResearchSourcesQueryKey(ideaId),
+    },
+  });
+  return <Panel className="idea-research-sources" testId="panel-idea-research-sources">
+    <div className="panel-heading">
+      <div><div className="eyebrow">SAVED YOUTUBE EVIDENCE</div><h2>Source videos</h2></div>
+      <span className="idea-source-qualification">REAL PLATFORM DATA</span>
+    </div>
+    <p className="idea-source-intro">These public videos informed the original research opportunity. Metrics below are returned YouTube counts, not AI estimates.</p>
+    {sources.isLoading ? <div className="idea-source-loading" data-testid="state-idea-sources-loading"><div className="skeleton-line wide" /><div className="skeleton-line" /><span>Loading saved source videos</span></div> :
+      sources.isError ? <div className="idea-source-error" role="alert" data-testid="state-idea-sources-error"><CircleAlert size={15} /><span>Source videos could not be loaded.</span><button type="button" className="research-text-button" onClick={() => void sources.refetch()} data-testid="button-retry-idea-sources">Retry</button></div> :
+        !sources.data?.length ? <div className="idea-source-empty" data-testid="state-idea-sources-empty">No returned source videos are attached to this idea.</div> :
+          <div className="idea-source-list">{sources.data.map((source: ResearchSource) => <IdeaResearchSourceRow key={source.id} source={source} />)}</div>}
+  </Panel>;
+}
+function IdeaResearchSourceRow({ source }: { source: ResearchSource }) {
+  return <article className="idea-source-row" data-testid={`row-idea-research-source-${source.id}`}>
+    <div className="idea-source-copy">
+      <a href={source.url} target="_blank" rel="noreferrer" className="idea-source-title" data-testid={`link-idea-research-source-${source.id}`}>{source.title}<ExternalLink size={12} /></a>
+      <span>{source.channelTitle}{source.publishedAt ? ` · ${formatDate(source.publishedAt)}` : ''}</span>
+    </div>
+    <div className="idea-source-metrics" aria-label="Real YouTube metrics">
+      <RealMetric label="Views" value={source.viewCount} />
+      <RealMetric label="Likes" value={source.likeCount} />
+      <RealMetric label="Comments" value={source.commentCount} />
+    </div>
+  </article>;
+}
 
 function StrategistPage() {
   const generate = useGenerateIdeas(); const refresh = useRefresh();

@@ -394,17 +394,25 @@ paths:
       operationId: analyzeResearchSession
       tags: [research]
       summary: Analyze a saved search using only its real YouTube results
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResearchAnalysisInput"
       responses:
         "200":
-          description: Evidence-linked AI analysis
+          description: Saved research session with evidence-linked AI analysis
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TrendAnalysis"
+                $ref: "#/components/schemas/ResearchSessionDetail"
         "400":
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "502":
+          $ref: "#/components/responses/ExternalServiceError"
         "503":
           $ref: "#/components/responses/AIUnavailable"
   /research/sessions/{id}/opportunities:
@@ -432,6 +440,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "404":
           $ref: "#/components/responses/NotFound"
+        "502":
+          $ref: "#/components/responses/ExternalServiceError"
         "503":
           $ref: "#/components/responses/AIUnavailable"
   /research/channels/{id}/analyze:
@@ -463,7 +473,7 @@ paths:
     post:
       operationId: createIdeaFromResearch
       tags: [research]
-      summary: Create a normal Ideas-library record from a saved video or opportunity
+      summary: Create a normal Ideas-library record from a saved opportunity
       requestBody:
         required: true
         content:
@@ -836,6 +846,11 @@ components:
           type: array
           items: { type: string }
         opportunityScore: { type: ["integer", "null"], minimum: 0, maximum: 100 }
+        researchSessionId: { type: ["string", "null"], format: uuid }
+        researchOpportunityId: { type: ["string", "null"], format: uuid }
+        researchSourceVideoIds:
+          type: array
+          items: { type: string }
         researchEvidence: { type: ["string", "null"] }
         originalityConsiderations:
           type: array
@@ -861,6 +876,9 @@ components:
         - weaknesses
         - improvements
         - opportunityScore
+        - researchSessionId
+        - researchOpportunityId
+        - researchSourceVideoIds
         - researchEvidence
         - originalityConsiderations
         - source
@@ -1019,35 +1037,42 @@ components:
       type: object
       properties:
         summary: { type: string }
+        dataSufficiency:
+          type: string
+          enum: [INSUFFICIENT, LIMITED, ADEQUATE]
+        sufficiencyNote: { type: string }
         frequentTopics:
           type: array
           items: { $ref: "#/components/schemas/EvidenceFinding" }
-        risingTopics:
+        recurringTopics:
           type: array
           items: { $ref: "#/components/schemas/EvidenceFinding" }
-        repeatedFormats:
+        recurringFormats:
           type: array
           items: { $ref: "#/components/schemas/EvidenceFinding" }
-        commonHooks:
+        commonTitlePatterns:
           type: array
           items: { $ref: "#/components/schemas/EvidenceFinding" }
-        lengthPatterns:
+        commonHookPatterns:
           type: array
-          items: { type: string }
-        titleStructures:
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        commonKeywords:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        durationPatterns:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        audienceSignals:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        saturationSignals:
           type: array
           items: { $ref: "#/components/schemas/EvidenceFinding" }
         contentGaps:
           type: array
           items: { $ref: "#/components/schemas/EvidenceFinding" }
-        audienceInterests:
-          type: array
-          items: { $ref: "#/components/schemas/EvidenceFinding" }
-        originalOpportunities:
-          type: array
-          items: { $ref: "#/components/schemas/EvidenceFinding" }
         analysisLabel: { type: string }
-      required: [summary, frequentTopics, risingTopics, repeatedFormats, commonHooks, lengthPatterns, titleStructures, contentGaps, audienceInterests, originalOpportunities, analysisLabel]
+      required: [summary, dataSufficiency, sufficiencyNote, frequentTopics, recurringTopics, recurringFormats, commonTitlePatterns, commonHookPatterns, commonKeywords, durationPatterns, audienceSignals, saturationSignals, contentGaps, analysisLabel]
     ChannelAnalysis:
       type: object
       properties:
@@ -1094,8 +1119,14 @@ components:
         id: { type: string, format: uuid }
         sessionId: { type: string, format: uuid }
         topic: { type: string }
+        suggestedTitle: { type: string }
+        targetAudience: { type: string }
+        suggestedDurationSeconds: { type: integer, minimum: 10, maximum: 180 }
         evidence: { type: string }
         whyInteresting: { type: string }
+        observedPatterns: { type: string }
+        saturationEvidence: { type: string }
+        originalityAngle: { type: string }
         competitionLevel:
           type: string
           enum: [LOW, MEDIUM, HIGH, UNKNOWN]
@@ -1104,6 +1135,9 @@ components:
         potentialScore: { type: integer, minimum: 0, maximum: 100 }
         scoreReason: { type: string }
         confidence: { $ref: "#/components/schemas/Confidence" }
+        sourceVideoIds:
+          type: array
+          items: { type: string }
         originalityConsiderations:
           type: array
           items: { type: string }
@@ -1111,7 +1145,7 @@ components:
           type: array
           items: { $ref: "#/components/schemas/ResearchSource" }
         scoreLabel: { type: string }
-      required: [id, sessionId, topic, evidence, whyInteresting, competitionLevel, suggestedFormat, suggestedHook, potentialScore, scoreReason, confidence, originalityConsiderations, sourceVideos, scoreLabel]
+      required: [id, sessionId, topic, suggestedTitle, targetAudience, suggestedDurationSeconds, evidence, whyInteresting, observedPatterns, saturationEvidence, originalityAngle, competitionLevel, suggestedFormat, suggestedHook, potentialScore, scoreReason, confidence, sourceVideoIds, originalityConsiderations, sourceVideos, scoreLabel]
     ResearchSessionDetail:
       type: object
       properties:
@@ -1154,13 +1188,17 @@ components:
       properties:
         channelUrlOrId: { type: string, minLength: 3, maxLength: 300 }
       required: [channelUrlOrId]
+    ResearchAnalysisInput:
+      type: object
+      properties:
+        force: { type: boolean, default: false }
     CreateResearchIdeaInput:
       type: object
       properties:
         sessionId: { type: string, format: uuid }
         sourceType:
           type: string
-          enum: [VIDEO, OPPORTUNITY]
+          enum: [OPPORTUNITY]
         sourceId: { type: string, format: uuid }
       required: [sessionId, sourceType, sourceId]
     StrategistAnalysis:

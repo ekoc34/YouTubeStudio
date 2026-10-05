@@ -140,6 +140,9 @@ export const researchAnalysesTable = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     uniqueIndex("research_analyses_session_kind_idx").on(
@@ -157,8 +160,14 @@ export const contentOpportunitiesTable = pgTable(
       .notNull()
       .references(() => researchSessionsTable.id, { onDelete: "cascade" }),
     topic: text("topic").notNull(),
+    suggestedTitle: text("suggested_title").notNull(),
+    targetAudience: text("target_audience").notNull(),
+    suggestedDurationSeconds: integer("suggested_duration_seconds").notNull(),
     evidence: text("evidence").notNull(),
     whyInteresting: text("why_interesting").notNull(),
+    observedPatterns: text("observed_patterns").notNull(),
+    saturationEvidence: text("saturation_evidence").notNull(),
+    originalityAngle: text("originality_angle").notNull(),
     competitionLevel: competitionLevelEnum("competition_level").notNull(),
     suggestedFormat: text("suggested_format").notNull(),
     suggestedHook: text("suggested_hook").notNull(),

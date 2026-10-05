@@ -13,8 +13,18 @@ export interface ContentOpportunity {
   id: string;
   sessionId: string;
   topic: string;
+  suggestedTitle: string;
+  targetAudience: string;
+  /**
+     * @minimum 10
+     * @maximum 180
+     */
+  suggestedDurationSeconds: number;
   evidence: string;
   whyInteresting: string;
+  observedPatterns: string;
+  saturationEvidence: string;
+  originalityAngle: string;
   competitionLevel: ContentOpportunityCompetitionLevel;
   suggestedFormat: string;
   suggestedHook: string;
@@ -25,6 +35,7 @@ export interface ContentOpportunity {
   potentialScore: number;
   scoreReason: string;
   confidence: Confidence;
+  sourceVideoIds: string[];
   originalityConsiderations: string[];
   sourceVideos: ResearchSource[];
   scoreLabel: string;

@@ -4,6 +4,7 @@ import {
   db,
   ideasTable,
   projectsTable,
+  researchSourcesTable,
 } from "@workspace/db";
 import {
   CreateIdeaBody,
@@ -11,6 +12,8 @@ import {
   DeleteIdeaParams,
   GetIdeaParams,
   GetIdeaResponse,
+  GetIdeaResearchSourcesParams,
+  GetIdeaResearchSourcesResponse,
   ListIdeasQueryParams,
   ListIdeasResponse,
   UpdateIdeaBody,
@@ -81,6 +84,32 @@ router.get("/ideas/:id", async (req, res): Promise<void> => {
   }
 
   res.json(GetIdeaResponse.parse(idea));
+});
+
+router.get("/ideas/:id/research-sources", async (req, res): Promise<void> => {
+  const params = GetIdeaResearchSourcesParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const [idea] = await db
+    .select({ id: ideasTable.id })
+    .from(ideasTable)
+    .where(eq(ideasTable.id, params.data.id))
+    .limit(1);
+  if (!idea) {
+    res.status(404).json({ error: "Idea not found." });
+    return;
+  }
+
+  const sources = await db
+    .select()
+    .from(researchSourcesTable)
+    .where(eq(researchSourcesTable.ideaId, idea.id))
+    .orderBy(desc(researchSourcesTable.retrievedAt));
+
+  res.json(GetIdeaResearchSourcesResponse.parse(sources));
 });
 
 router.patch("/ideas/:id", async (req, res): Promise<void> => {

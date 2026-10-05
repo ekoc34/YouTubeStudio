@@ -1,30 +1,39 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  getListIdeasQueryKey,
   getGetResearchSessionQueryKey,
   getListResearchSessionsQueryKey,
+  useAnalyzeResearchSession,
+  useCreateIdeaFromResearch,
   useGetResearchSession,
   useGetResearchStatus,
   useListResearchSessions,
   useSearchResearch,
 } from "@workspace/api-client-react";
 import type {
+  ContentOpportunity,
+  EvidenceFinding,
+  Idea,
   ResearchSearchInput,
   ResearchSession,
   ResearchSessionDetail,
   ResearchVideo,
 } from "@workspace/api-client-react";
 import {
-  CalendarDays,
+  Check,
+  CheckCircle2,
   CircleAlert,
   Database,
   ExternalLink,
   Search,
+  Sparkles,
   Youtube,
 } from "lucide-react";
+import { Link } from "wouter";
 import {
   Form,
   FormControl,
@@ -136,9 +145,14 @@ export default function ResearchPage() {
   const status = useGetResearchStatus();
   const sessions = useListResearchSessions();
   const search = useSearchResearch();
+  const analyze = useAnalyzeResearchSession();
+  const createIdea = useCreateIdeaFromResearch();
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [latestResult, setLatestResult] =
     useState<ResearchSessionDetail | null>(null);
+  const [createdIdeas, setCreatedIdeas] = useState<Record<string, Idea>>({});
+  const activeSessionRef = useRef(activeSessionId);
+  activeSessionRef.current = activeSessionId;
   const savedSession = useGetResearchSession(activeSessionId ?? "", {
     query: {
       enabled: Boolean(activeSessionId),
@@ -160,6 +174,7 @@ export default function ResearchPage() {
   });
 
   const youtubeReady = status.data?.youtubeConfigured === true;
+  const aiReady = status.data?.aiConfigured === true;
   const available = youtubeReady && !status.isLoading && !status.isError;
   const detail = latestResult ?? savedSession.data ?? null;
   const history =
@@ -167,11 +182,57 @@ export default function ResearchPage() {
 
   function selectSession(session: ResearchSession) {
     search.reset();
+    analyze.reset();
+    createIdea.reset();
     setLatestResult(null);
     setActiveSessionId(session.id);
   }
 
+  function analyzeSession(sessionId: string, force: boolean) {
+    analyze.mutate(
+      { id: sessionId, data: { force } },
+      {
+        onSuccess: (result) => {
+          if (activeSessionRef.current === sessionId) {
+            setLatestResult(result);
+          }
+          void client.invalidateQueries({
+            queryKey: getGetResearchSessionQueryKey(sessionId),
+          });
+          void client.invalidateQueries({
+            queryKey: getListResearchSessionsQueryKey(),
+          });
+        },
+      },
+    );
+  }
+
+  function createIdeaFromOpportunity(sessionId: string, opportunityId: string) {
+    createIdea.mutate(
+      {
+        data: {
+          sessionId,
+          sourceType: "OPPORTUNITY",
+          sourceId: opportunityId,
+        },
+      },
+      {
+        onSuccess: (idea) => {
+          setCreatedIdeas((previous) => ({
+            ...previous,
+            [opportunityId]: idea,
+          }));
+          void client.invalidateQueries({
+            queryKey: getListIdeasQueryKey(),
+          });
+        },
+      },
+    );
+  }
+
   function submitSearch(values: ResearchFormValues) {
+    analyze.reset();
+    createIdea.reset();
     setLatestResult(null);
     setActiveSessionId(null);
     const data: ResearchSearchInput = {
@@ -249,6 +310,23 @@ export default function ResearchPage() {
             <p>
               Add <code>YOUTUBE_API_KEY</code> through Replit Secrets to run
               real searches. No sample videos or estimated metrics are shown.
+            </p>
+          </div>
+        </div>
+      )}
+      {!status.isLoading && !status.isError && !aiReady && (
+        <div
+          className="research-status is-warning"
+          role="status"
+          data-testid="state-ai-unavailable"
+        >
+          <CircleAlert size={17} />
+          <div>
+            <b>AI analysis is not configured.</b>
+            <p>
+              Saved analyses remain available. Add{" "}
+              <code>OPENAI_API_KEY</code> through Replit Secrets to request
+              model-generated trend insights and opportunities.
             </p>
           </div>
         </div>
@@ -502,7 +580,18 @@ export default function ResearchPage() {
             )}
           </section>
 
-          {detail && <SessionResults detail={detail} />}
+          {detail && (
+            <SessionResults
+              detail={detail}
+              analyze={analyze}
+              onAnalyze={(force) => analyzeSession(detail.session.id, force)}
+              createIdea={createIdea}
+              createdIdeas={createdIdeas}
+              onCreateIdea={(opportunityId) =>
+                createIdeaFromOpportunity(detail.session.id, opportunityId)
+              }
+            />
+          )}
           {!detail && activeSessionId && savedSession.isLoading && (
             <div className="loading-state" data-testid="state-session-loading">
               <div className="skeleton-line wide" />
@@ -599,7 +688,21 @@ export default function ResearchPage() {
   );
 }
 
-function SessionResults({ detail }: { detail: ResearchSessionDetail }) {
+function SessionResults({
+  detail,
+  analyze,
+  onAnalyze,
+  createIdea,
+  createdIdeas,
+  onCreateIdea,
+}: {
+  detail: ResearchSessionDetail;
+  analyze: ReturnType<typeof useAnalyzeResearchSession>;
+  onAnalyze: (force: boolean) => void;
+  createIdea: ReturnType<typeof useCreateIdeaFromResearch>;
+  createdIdeas: Record<string, Idea>;
+  onCreateIdea: (opportunityId: string) => void;
+}) {
   const { session, videos } = detail;
   return (
     <section
@@ -646,7 +749,456 @@ function SessionResults({ detail }: { detail: ResearchSessionDetail }) {
           ))}
         </div>
       )}
+      <ResearchAnalysis
+        detail={detail}
+        analysisPending={analyze.isPending}
+        analysisError={
+          analyze.isError
+            ? analyze.error instanceof Error
+              ? analyze.error.message
+              : "Analysis could not be completed."
+            : null
+        }
+        onAnalyze={onAnalyze}
+        onDismissAnalysisError={() => analyze.reset()}
+        createPending={createIdea.isPending}
+        creatingOpportunityId={createIdea.variables?.data.sourceId}
+        createErrorOpportunityId={
+          createIdea.isError ? createIdea.variables?.data.sourceId : undefined
+        }
+        createError={
+          createIdea.isError
+            ? createIdea.error instanceof Error
+              ? createIdea.error.message
+              : "The idea could not be added."
+            : null
+        }
+        onDismissCreateError={() => createIdea.reset()}
+        createdIdeas={createdIdeas}
+        onCreateIdea={onCreateIdea}
+      />
     </section>
+  );
+}
+
+const findingGroups: {
+  key: keyof NonNullable<ResearchSessionDetail["trendAnalysis"]>;
+  label: string;
+}[] = [
+  { key: "frequentTopics", label: "Frequent topics" },
+  { key: "recurringTopics", label: "Recurring topics" },
+  { key: "recurringFormats", label: "Recurring formats" },
+  { key: "commonTitlePatterns", label: "Title patterns" },
+  { key: "commonHookPatterns", label: "Hook patterns" },
+  { key: "commonKeywords", label: "Common keywords" },
+  { key: "durationPatterns", label: "Duration patterns" },
+  { key: "audienceSignals", label: "Audience signals" },
+  { key: "saturationSignals", label: "Saturation signals" },
+  { key: "contentGaps", label: "Content gaps" },
+];
+
+function ResearchAnalysis({
+  detail,
+  analysisPending,
+  analysisError,
+  onAnalyze,
+  onDismissAnalysisError,
+  createPending,
+  creatingOpportunityId,
+  createErrorOpportunityId,
+  createError,
+  onDismissCreateError,
+  createdIdeas,
+  onCreateIdea,
+}: {
+  detail: ResearchSessionDetail;
+  analysisPending: boolean;
+  analysisError: string | null;
+  onAnalyze: (force: boolean) => void;
+  onDismissAnalysisError: () => void;
+  createPending: boolean;
+  creatingOpportunityId?: string;
+  createErrorOpportunityId?: string;
+  createError: string | null;
+  onDismissCreateError: () => void;
+  createdIdeas: Record<string, Idea>;
+  onCreateIdea: (opportunityId: string) => void;
+}) {
+  const analysis = detail.trendAnalysis;
+  const opportunities = detail.opportunities ?? [];
+  const hasSavedResult = Boolean(analysis) || opportunities.length > 0;
+  const sourcesByVideoId = new Map(
+    detail.videos.map((video) => [video.videoId, video]),
+  );
+
+  return (
+    <section
+      className="research-analysis"
+      aria-label="Saved-search analysis and opportunities"
+      data-testid={`panel-research-analysis-${detail.session.id}`}
+    >
+      <div className="research-analysis-head">
+        <div>
+          <div className="eyebrow">EVIDENCE → ORIGINAL ANGLES</div>
+          <h3>What the results suggest</h3>
+          <p>
+            Patterns and opportunities are AI analysis of this saved search,
+            not measured channel performance.
+          </p>
+        </div>
+        <button
+          className="button button-secondary research-analyze-button"
+          type="button"
+          onClick={() => onAnalyze(hasSavedResult)}
+          disabled={analysisPending || detail.videos.length === 0}
+          data-testid={`button-analyze-research-${detail.session.id}`}
+        >
+          <Sparkles size={14} />
+          {analysisPending
+            ? "Analyzing saved results…"
+            : hasSavedResult
+              ? "Re-analyze"
+              : "Analyze saved results"}
+        </button>
+      </div>
+
+      {analysisError && (
+        <div
+          className="research-status is-error"
+          role="alert"
+          data-testid="state-analysis-error"
+        >
+          <CircleAlert size={16} />
+          <span>{analysisError}</span>
+          <button
+            type="button"
+            className="research-text-button"
+            onClick={onDismissAnalysisError}
+            data-testid="button-dismiss-analysis-error"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {detail.videos.length === 0 && !hasSavedResult && (
+        <div
+          className="research-analysis-empty"
+          data-testid="state-analysis-no-source-videos"
+        >
+          <CircleAlert size={17} />
+          <span>
+            There are no saved source videos to analyze. Broaden the search and
+            save real results first.
+          </span>
+        </div>
+      )}
+
+      {!hasSavedResult && detail.videos.length > 0 && !analysisPending && (
+        <div
+          className="research-analysis-empty"
+          data-testid="state-analysis-missing"
+        >
+          <span className="analysis-empty-mark"><Sparkles size={16} /></span>
+          <span>
+            No saved analysis yet. Nothing runs in the background; analyze this
+            result set when you are ready.
+          </span>
+        </div>
+      )}
+
+      {analysisPending && !hasSavedResult && (
+        <div className="research-analysis-loading" data-testid="state-analysis-loading">
+          <div className="skeleton-line wide" />
+          <div className="skeleton-line" />
+          <span>Reading the saved evidence</span>
+        </div>
+      )}
+
+      {analysis && (
+        <div className="research-analysis-content">
+          <div
+            className={`sufficiency-note sufficiency-${analysis.dataSufficiency.toLowerCase()}`}
+            data-testid="state-data-sufficiency"
+          >
+            <div className="sufficiency-topline">
+              <span className="sufficiency-label">
+                {analysis.dataSufficiency === "INSUFFICIENT"
+                  ? "Insufficient evidence"
+                  : analysis.dataSufficiency === "LIMITED"
+                    ? "Limited evidence"
+                    : "Evidence coverage"}
+              </span>
+              <span className="analysis-qualification">
+                {analysis.analysisLabel} · AI analysis
+              </span>
+            </div>
+            <p>{analysis.sufficiencyNote}</p>
+          </div>
+
+          <div className="analysis-summary">
+            <span className="analysis-summary-index">READOUT</span>
+            <p>{analysis.summary}</p>
+          </div>
+
+          <div className="finding-groups">
+            {findingGroups.map(({ key, label }) => {
+              const findings = analysis[key] as EvidenceFinding[];
+              if (!findings?.length) return null;
+              return (
+                <section className="finding-group" key={key}>
+                  <div className="finding-group-heading">
+                    <h4>{label}</h4>
+                    <span>{String(findings.length).padStart(2, "0")}</span>
+                  </div>
+                  <div className="finding-list">
+                    {findings.map((finding, index) => (
+                      <article
+                        className="finding-row"
+                        key={`${key}-${index}`}
+                        data-testid={`row-analysis-finding-${key}-${index}`}
+                      >
+                        <div className="finding-main">
+                          <p>{finding.insight}</p>
+                          <span>{finding.evidence}</span>
+                        </div>
+                        <span className="ai-confidence">
+                          AI estimate · {finding.confidence.toLowerCase()} confidence
+                        </span>
+                        <FindingSources
+                          ids={finding.sourceVideoIds}
+                          sourcesByVideoId={sourcesByVideoId}
+                          testPrefix={`${key}-${index}`}
+                        />
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {hasSavedResult && opportunities.length === 0 && (
+        <div
+          className="research-opportunity-empty"
+          data-testid="state-opportunities-empty"
+        >
+          <span className="eyebrow">OPPORTUNITY DESK</span>
+          <p>
+            No original opportunities were saved for this analysis. Re-analyze
+            the evidence to refresh the readout.
+          </p>
+        </div>
+      )}
+
+      {opportunities.length > 0 && (
+        <div className="opportunity-section">
+          <div className="opportunity-heading">
+            <div>
+              <div className="eyebrow">BUILT FROM THE EVIDENCE</div>
+              <h3>Originality opportunities</h3>
+            </div>
+            <span className="opportunity-count">
+              {String(opportunities.length).padStart(2, "0")} saved
+            </span>
+          </div>
+          <div className="opportunity-list">
+            {opportunities.map((opportunity, index) => (
+              <OpportunityCard
+                key={opportunity.id}
+                opportunity={opportunity}
+                index={index}
+                createPending={createPending}
+                creating={creatingOpportunityId === opportunity.id}
+                createdIdea={createdIdeas[opportunity.id]}
+                createError={
+                  createErrorOpportunityId === opportunity.id ? createError : null
+                }
+                onDismissCreateError={onDismissCreateError}
+                onCreate={() => onCreateIdea(opportunity.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function FindingSources({
+  ids,
+  sourcesByVideoId,
+  testPrefix,
+}: {
+  ids: string[];
+  sourcesByVideoId: Map<string, ResearchVideo>;
+  testPrefix: string;
+}) {
+  const sources = ids
+    .map((id) => sourcesByVideoId.get(id))
+    .filter((source): source is ResearchVideo => Boolean(source));
+  if (!sources.length) {
+    return <span className="source-unavailable">No returned source links</span>;
+  }
+  return (
+    <div className="analysis-source-links" aria-label="Evidence video sources">
+      {sources.map((source) => (
+        <a
+          key={source.videoId}
+          href={source.url}
+          target="_blank"
+          rel="noreferrer"
+          data-testid={`link-analysis-source-${testPrefix}-${source.videoId}`}
+        >
+          <Youtube size={12} />
+          <span>{source.title}</span>
+          <ExternalLink size={11} />
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function OpportunityCard({
+  opportunity,
+  index,
+  createPending,
+  creating,
+  createdIdea,
+  createError,
+  onDismissCreateError,
+  onCreate,
+}: {
+  opportunity: ContentOpportunity;
+  index: number;
+  createPending: boolean;
+  creating: boolean;
+  createdIdea?: Idea;
+  createError: string | null;
+  onDismissCreateError: () => void;
+  onCreate: () => void;
+}) {
+  const sourcesById = new Set(opportunity.sourceVideoIds);
+  const citedSources = opportunity.sourceVideos.filter(
+    (source) => source.videoId && sourcesById.has(source.videoId),
+  );
+  const minutes = Math.floor(opportunity.suggestedDurationSeconds / 60);
+  const seconds = opportunity.suggestedDurationSeconds % 60;
+
+  return (
+    <article
+      className="opportunity-card"
+      data-testid={`row-research-opportunity-${opportunity.id}`}
+    >
+      <div className="opportunity-card-top">
+        <span className="opportunity-index">{String(index + 1).padStart(2, "0")}</span>
+        <div className="opportunity-title-block">
+          <span className="opportunity-topic">{opportunity.topic}</span>
+          <h4>{opportunity.suggestedTitle}</h4>
+        </div>
+        <div className="opportunity-score">
+          <span>{opportunity.scoreLabel}</span>
+          <b>{opportunity.potentialScore}<small>/100</small></b>
+          <small>AI estimate</small>
+        </div>
+      </div>
+
+      <p className="opportunity-hook">{opportunity.suggestedHook}</p>
+      <div className="opportunity-specs">
+        <span>{opportunity.suggestedFormat}</span>
+        <span>{minutes ? `${minutes}m ` : ""}{String(seconds).padStart(2, "0")}s suggested</span>
+        <span>For {opportunity.targetAudience}</span>
+        <span>{opportunity.competitionLevel.toLowerCase()} competition · AI estimate</span>
+        <span>{opportunity.confidence.toLowerCase()} confidence · AI estimate</span>
+      </div>
+
+      <div className="opportunity-rationale">
+        <div><b>Why it may work</b><p>{opportunity.whyInteresting}</p></div>
+        <div><b>Observed pattern</b><p>{opportunity.observedPatterns}</p></div>
+        <div><b>Originality angle</b><p>{opportunity.originalityAngle}</p></div>
+        <div><b>What the score reflects</b><p>{opportunity.scoreReason}</p></div>
+        <div><b>Evidence</b><p>{opportunity.evidence}</p></div>
+        <div><b>Saturation observed</b><p>{opportunity.saturationEvidence}</p></div>
+      </div>
+
+      {opportunity.originalityConsiderations.length > 0 && (
+        <div className="originality-notes">
+          <b>Keep the execution distinct</b>
+          <ul>
+            {opportunity.originalityConsiderations.map((note, noteIndex) => (
+              <li key={noteIndex}>{note}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="opportunity-sources">
+        <span className="opportunity-sources-label">
+          <Database size={12} /> Returned source videos
+        </span>
+        {citedSources.length ? (
+          <div className="analysis-source-links">
+            {citedSources.map((source) => (
+              <a
+                key={source.id}
+                href={source.url}
+                target="_blank"
+                rel="noreferrer"
+                data-testid={`link-opportunity-source-${opportunity.id}-${source.videoId}`}
+              >
+                <Youtube size={12} />
+                <span>{source.title} · {source.channelTitle}</span>
+                <ExternalLink size={11} />
+              </a>
+            ))}
+          </div>
+        ) : (
+          <span className="source-unavailable">No returned source links for this angle.</span>
+        )}
+      </div>
+
+      <div className="opportunity-action-row">
+        {createdIdea ? (
+          <div className="idea-created-confirmation" data-testid={`state-opportunity-created-${opportunity.id}`}>
+            <CheckCircle2 size={15} />
+            <span>Added to your Ideas library</span>
+            <Link
+              href={`/ideas/${createdIdea.id}`}
+              className="created-idea-link"
+              data-testid={`link-created-idea-${opportunity.id}`}
+            >
+              Open idea <ExternalLink size={12} />
+            </Link>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="button button-primary"
+            onClick={onCreate}
+            disabled={createPending}
+            data-testid={`button-create-idea-${opportunity.id}`}
+          >
+            {creating ? <Check size={14} /> : <Sparkles size={14} />}
+            {creating ? "Saving idea…" : "Create idea"}
+          </button>
+        )}
+        {createError && !createdIdea && (
+          <div className="opportunity-create-error" role="alert">
+            <span>{createError}</span>
+            <button
+              className="research-text-button"
+              type="button"
+              onClick={onDismissCreateError}
+              data-testid={`button-dismiss-create-idea-error-${opportunity.id}`}
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+      </div>
+    </article>
   );
 }
 
