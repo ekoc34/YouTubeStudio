@@ -5,7 +5,9 @@
  * YouTube Content Studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { ErrorResponse } from './errorResponse';
 
-export interface HealthStatus {
-  status: string;
-}
+/**
+ * Invalid input
+ */
+export type BadRequestResponse = ErrorResponse;

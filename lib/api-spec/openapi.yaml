@@ -3,18 +3,26 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: YouTube Content Studio API
 servers:
   - url: /api
     description: Base API path
 tags:
-  - name: health
-    description: Health operations
+  - name: dashboard
+    description: Creator dashboard summaries
+  - name: ideas
+    description: YouTube content ideas
+  - name: strategist
+    description: AI-assisted YouTube content strategy
+  - name: projects
+    description: Content production projects
+  - name: scripts
+    description: Editable YouTube Shorts scripts
 paths:
   /healthz:
     get:
       operationId: healthCheck
-      tags: [health]
+      tags: [dashboard]
       summary: Health check
       description: Returns server health status
       responses:
@@ -24,7 +32,419 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get creator dashboard summary
+      responses:
+        "200":
+          description: Current idea, project, script, pipeline, and performance summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /ideas:
+    get:
+      operationId: listIdeas
+      tags: [ideas]
+      summary: List and search ideas
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/IdeaStatus"
+        - name: q
+          in: query
+          schema:
+            type: string
+            maxLength: 160
+      responses:
+        "200":
+          description: Matching ideas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Idea"
+    post:
+      operationId: createIdea
+      tags: [ideas]
+      summary: Create an idea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdeaInput"
+      responses:
+        "201":
+          description: Created idea
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Idea"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /ideas/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getIdea
+      tags: [ideas]
+      summary: Get an idea
+      responses:
+        "200":
+          description: Idea details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Idea"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateIdea
+      tags: [ideas]
+      summary: Update an idea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdeaUpdate"
+      responses:
+        "200":
+          description: Updated idea
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Idea"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteIdea
+      tags: [ideas]
+      summary: Delete an idea that is not attached to a project
+      responses:
+        "204":
+          description: Idea deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /strategist/ideas:
+    post:
+      operationId: generateIdeas
+      tags: [strategist]
+      summary: Generate and save YouTube content ideas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateIdeasInput"
+      responses:
+        "201":
+          description: Generated ideas saved to the idea library
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Idea"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /strategist/analyze:
+    post:
+      operationId: analyzeIdea
+      tags: [strategist]
+      summary: Score and improve a YouTube idea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeIdeaInput"
+      responses:
+        "200":
+          description: Strategist analysis with scores and actionable feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StrategistAnalysis"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List content projects
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/ProjectStatus"
+      responses:
+        "200":
+          description: Content projects with their linked idea and script counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContentProject"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Start a content project from an idea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created content project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentProject"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /projects/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a project and its linked idea and scripts
+      responses:
+        "200":
+          description: Project details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Rename a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentProject"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete a project and its scripts
+      responses:
+        "204":
+          description: Project deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /projects/{id}/status:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: updateProjectStatus
+      tags: [projects]
+      summary: Move a project to a supported production stage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectStatusUpdate"
+      responses:
+        "200":
+          description: Updated project status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentProject"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /scripts:
+    get:
+      operationId: listScripts
+      tags: [scripts]
+      summary: List scripts, optionally within a project
+      parameters:
+        - name: projectId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Scripts with their ordered scenes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShortsScript"
+  /scripts/generate:
+    post:
+      operationId: generateScript
+      tags: [scripts]
+      summary: Generate and save a complete Shorts script from an idea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateScriptInput"
+      responses:
+        "201":
+          description: Generated editable script and project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortsScript"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /scripts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getScript
+      tags: [scripts]
+      summary: Get a script and its ordered scenes
+      responses:
+        "200":
+          description: Script details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortsScript"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateScript
+      tags: [scripts]
+      summary: Edit a draft script and its scenes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScriptUpdate"
+      responses:
+        "200":
+          description: Updated draft script
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortsScript"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /scripts/{id}/approve:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: approveScript
+      tags: [scripts]
+      summary: Approve a script after editing
+      responses:
+        "200":
+          description: Approved script
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortsScript"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
 components:
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: Request conflicts with current state
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    AIUnavailable:
+      description: The configured AI provider is unavailable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +453,279 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    IdeaStatus:
+      type: string
+      enum: [NEW, RESEARCHING, APPROVED, REJECTED, SCRIPTING, READY]
+    IdeaSource:
+      type: string
+      enum: [MANUAL, STRATEGIST]
+    ProjectStatus:
+      type: string
+      enum:
+        - IDEA
+        - RESEARCH
+        - SCRIPT
+        - SCENES
+        - MEDIA
+        - VOICE
+        - EDIT
+        - QUALITY_CHECK
+        - READY
+        - UPLOADED
+        - PUBLISHED
+        - FAILED
+    ScriptStatus:
+      type: string
+      enum: [DRAFT, APPROVED]
+    Idea:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        topic: { type: string }
+        hook: { type: string }
+        description: { type: string }
+        targetAudience: { type: string }
+        format: { type: string }
+        estimatedDuration: { type: integer }
+        viralScore: { type: ["integer", "null"], minimum: 0, maximum: 100 }
+        originalityScore: { type: ["integer", "null"], minimum: 0, maximum: 100 }
+        rationale: { type: ["string", "null"] }
+        weaknesses:
+          type: array
+          items: { type: string }
+        improvements:
+          type: array
+          items: { type: string }
+        source:
+          $ref: "#/components/schemas/IdeaSource"
+        status:
+          $ref: "#/components/schemas/IdeaStatus"
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required:
+        - id
+        - title
+        - topic
+        - hook
+        - description
+        - targetAudience
+        - format
+        - estimatedDuration
+        - viralScore
+        - originalityScore
+        - rationale
+        - weaknesses
+        - improvements
+        - source
+        - status
+        - createdAt
+        - updatedAt
+    IdeaInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 1, maxLength: 180 }
+        topic: { type: string, minLength: 1, maxLength: 200 }
+        hook: { type: string, minLength: 1, maxLength: 500 }
+        description: { type: string, maxLength: 3000 }
+        targetAudience: { type: string, minLength: 1, maxLength: 240 }
+        format: { type: string, minLength: 1, maxLength: 100 }
+        estimatedDuration: { type: integer, minimum: 10, maximum: 180 }
+      required: [title, topic, hook, description, targetAudience, format, estimatedDuration]
+    IdeaUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1, maxLength: 180 }
+        topic: { type: string, minLength: 1, maxLength: 200 }
+        hook: { type: string, minLength: 1, maxLength: 500 }
+        description: { type: string, maxLength: 3000 }
+        targetAudience: { type: string, minLength: 1, maxLength: 240 }
+        format: { type: string, minLength: 1, maxLength: 100 }
+        estimatedDuration: { type: integer, minimum: 10, maximum: 180 }
+        status:
+          $ref: "#/components/schemas/IdeaStatus"
+    GenerateIdeasInput:
+      type: object
+      properties:
+        topic: { type: string, maxLength: 200 }
+        targetAudience: { type: string, maxLength: 240 }
+        format: { type: string, maxLength: 100 }
+        count: { type: integer, minimum: 1, maximum: 8, default: 4 }
+    AnalyzeIdeaInput:
+      type: object
+      properties:
+        ideaId: { type: string, format: uuid }
+        title: { type: string, maxLength: 180 }
+        topic: { type: string, maxLength: 200 }
+        hook: { type: string, maxLength: 500 }
+        description: { type: string, maxLength: 3000 }
+        targetAudience: { type: string, maxLength: 240 }
+        format: { type: string, maxLength: 100 }
+        estimatedDuration: { type: integer, minimum: 10, maximum: 180 }
+    StrategistAnalysis:
+      type: object
+      properties:
+        viralScore: { type: integer, minimum: 0, maximum: 100 }
+        originalityScore: { type: integer, minimum: 0, maximum: 100 }
+        explanation: { type: string }
+        hookOptions:
+          type: array
+          items: { type: string }
+        weaknesses:
+          type: array
+          items: { type: string }
+        improvements:
+          type: array
+          items: { type: string }
+      required: [viralScore, originalityScore, explanation, hookOptions, weaknesses, improvements]
+    ProjectInput:
+      type: object
+      properties:
+        ideaId: { type: string, format: uuid }
+        name: { type: string, minLength: 1, maxLength: 180 }
+      required: [ideaId]
+    ProjectUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 180 }
+      required: [name]
+    ProjectStatusUpdate:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/ProjectStatus"
+      required: [status]
+    ContentProject:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        ideaId: { type: string, format: uuid }
+        name: { type: string }
+        status:
+          $ref: "#/components/schemas/ProjectStatus"
+        ideaTitle: { type: string }
+        scriptCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, ideaId, name, status, ideaTitle, scriptCount, createdAt, updatedAt]
+    ProjectDetail:
+      type: object
+      properties:
+        project:
+          $ref: "#/components/schemas/ContentProject"
+        idea:
+          $ref: "#/components/schemas/Idea"
+        scripts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShortsScript"
+      required: [project, idea, scripts]
+    SceneInput:
+      type: object
+      properties:
+        sequence: { type: integer, minimum: 1 }
+        narration: { type: string }
+        visualInstructions: { type: string }
+        onScreenText: { type: string }
+        soundSuggestion: { type: string }
+      required: [sequence, narration, visualInstructions, onScreenText, soundSuggestion]
+    ScriptScene:
+      allOf:
+        - $ref: "#/components/schemas/SceneInput"
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            scriptId: { type: string, format: uuid }
+          required: [id, scriptId]
+    GenerateScriptInput:
+      type: object
+      properties:
+        ideaId: { type: string, format: uuid }
+        projectId: { type: string, format: uuid }
+        targetDurationSeconds: { type: integer, minimum: 15, maximum: 180, default: 45 }
+        tone: { type: string, maxLength: 120 }
+      required: [ideaId]
+    ScriptUpdate:
+      type: object
+      properties:
+        hook: { type: string, minLength: 1, maxLength: 800 }
+        narration: { type: string, minLength: 1, maxLength: 12000 }
+        soundMusic: { type: string, maxLength: 1000 }
+        cta: { type: string, maxLength: 800 }
+        scenes:
+          type: array
+          maxItems: 24
+          items:
+            $ref: "#/components/schemas/SceneInput"
+    ShortsScript:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        projectId: { type: string, format: uuid }
+        ideaId: { type: string, format: uuid }
+        hook: { type: string }
+        narration: { type: string }
+        soundMusic: { type: string }
+        cta: { type: string }
+        status:
+          $ref: "#/components/schemas/ScriptStatus"
+        scenes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScriptScene"
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, projectId, ideaId, hook, narration, soundMusic, cta, status, scenes, createdAt, updatedAt]
+    StatusCount:
+      type: object
+      properties:
+        status: { type: string }
+        count: { type: integer }
+      required: [status, count]
+    PerformanceItem:
+      type: object
+      properties:
+        videoTitle: { type: string }
+        views: { type: integer }
+        likes: { type: integer }
+        comments: { type: integer }
+        publishedAt: { type: string, format: date-time }
+        url: { type: string, format: uri }
+      required: [videoTitle, views, likes, comments, publishedAt, url]
+    DashboardSummary:
+      type: object
+      properties:
+        videosCreated: { type: integer }
+        videosPublished: { type: integer }
+        ideasGenerated: { type: integer }
+        scriptsCreated: { type: integer }
+        projectsInProduction: { type: integer }
+        ideasByStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        productionByStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        performanceAvailable: { type: boolean }
+        recentPerformance:
+          type: array
+          items:
+            $ref: "#/components/schemas/PerformanceItem"
+        recentProjects:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentProject"
+        recentIdeas:
+          type: array
+          items:
+            $ref: "#/components/schemas/Idea"
+      required: [videosCreated, videosPublished, ideasGenerated, scriptsCreated, projectsInProduction, ideasByStatus, productionByStatus, performanceAvailable, recentPerformance, recentProjects, recentIdeas]
 

@@ -5,7 +5,9 @@
  * YouTube Content Studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { SceneInput } from './sceneInput';
 
-export interface HealthStatus {
-  status: string;
-}
+export type ScriptScene = SceneInput & {
+  id: string;
+  scriptId: string;
+};
