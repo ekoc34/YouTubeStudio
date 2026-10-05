@@ -1,0 +1,319 @@
+Phase 2A is complete and live-verified.
+
+The current YouTubeStudio project now has:
+
+* Real YouTube Data API integration
+* Server-side YouTube search
+* Saved Research Sessions
+* Research history
+* Video details
+* Channel research
+* Research database models
+* Research API endpoints
+* Research UI
+* Existing OpenAI provider
+* Existing Ideas system
+* Existing Script Studio
+
+A live YouTube search successfully returned 25 real videos and the saved session was reloaded successfully.
+
+Now implement **Phase 2B: Trend Intelligence & Opportunity Finder**.
+
+IMPORTANT:
+Do not rebuild or replace Phase 2A.
+Do not modify the existing YouTube provider unnecessarily.
+Do not create a second OpenAI integration.
+Do not generate fake YouTube data.
+Do not claim AI estimates are real YouTube metrics.
+Do not implement video generation or YouTube uploading yet.
+
+## 1. Trend Intelligence
+
+Add an AI analysis layer that accepts real ResearchSession results and analyzes them using the existing OpenAI provider.
+
+Create a structured analysis containing:
+
+* dominant topics
+* recurring topics
+* recurring formats
+* common title patterns
+* common hook patterns
+* common keywords
+* duration patterns
+* audience signals when reasonably inferable
+* content saturation signals
+* content gaps
+* possible opportunities
+
+The AI must only analyze the real research data provided to it.
+
+If the research dataset is too small or insufficient for a reliable conclusion, explicitly say so.
+
+Do not fabricate missing metrics.
+
+## 2. Separate REAL DATA from AI ANALYSIS
+
+This distinction is critical.
+
+The UI must clearly separate:
+
+REAL YOUTUBE DATA
+
+from:
+
+AI ANALYSIS / ESTIMATION
+
+For example:
+
+"Views: 124,532" = real API data
+
+"Opportunity Score: 84/100" = AI estimate
+
+Never present an AI estimate as a YouTube metric.
+
+## 3. Trend Analysis API
+
+Add an endpoint such as:
+
+POST /api/research/sessions/{id}/analyze
+
+It should:
+
+1. Load the saved ResearchSession
+2. Load its real ResearchVideo records
+3. Send structured data to the existing OpenAI provider
+4. Validate the structured AI response
+5. Save the analysis
+6. Return the saved analysis
+
+Do not expose the OpenAI API key.
+
+Do not make AI calls automatically when simply opening the Research page.
+
+The user must explicitly trigger analysis.
+
+## 4. Analysis persistence
+
+Create a ResearchAnalysis model/table if necessary.
+
+Store:
+
+* researchSessionId
+* analysis result
+* createdAt
+* updatedAt
+
+Keep the raw research data separate from AI analysis.
+
+Do not overwrite the original YouTube data.
+
+## 5. Opportunity Finder
+
+Based on the real research dataset and AI analysis, generate content opportunities.
+
+Each opportunity should contain:
+
+* topic
+* suggested title
+* suggested hook
+* why it may work
+* target audience
+* suggested format
+* suggested duration
+* competition/saturation assessment
+* opportunity score
+* confidence
+* evidence
+* source video IDs
+
+The AI should explain the reasoning behind each score.
+
+IMPORTANT:
+
+Opportunity Score is an AI estimate.
+
+It must never be described as:
+
+* YouTube score
+* YouTube ranking
+* actual viral probability
+* guaranteed views
+
+Use wording such as:
+
+"AI Opportunity Score"
+
+and:
+
+"AI estimate based on the researched dataset."
+
+## 6. Originality
+
+The system must actively avoid recommending direct copies of researched videos.
+
+For every opportunity, include:
+
+* What existing videos are doing
+* What is already saturated
+* How our proposed idea is different
+
+The goal is:
+
+INSPIRE FROM DATA → CREATE SOMETHING ORIGINAL
+
+not:
+
+COPY A COMPETITOR.
+
+## 7. Research UI
+
+Upgrade the existing Research page.
+
+Add an "Analyze Research" button for saved research sessions.
+
+After analysis, display sections such as:
+
+### Research Summary
+
+Real data:
+
+* number of videos
+* number of channels
+* available metrics
+
+### Topic Patterns
+
+* dominant topics
+* recurring topics
+
+### Title & Hook Patterns
+
+* common title structures
+* common hooks
+
+### Content Gaps
+
+* identified gaps
+* evidence
+
+### Opportunities
+
+Cards containing:
+
+* title
+* hook
+* score
+* confidence
+* format
+* why
+* originality angle
+
+Clearly label AI-generated analysis.
+
+## 8. Create Idea from Opportunity
+
+This is very important.
+
+Every opportunity should have:
+
+"Create Idea"
+
+When clicked, create an entry in the EXISTING Ideas system.
+
+Populate:
+
+* title
+* topic
+* hook
+* description
+* target audience
+* format
+* estimated duration
+* AI opportunity score
+* research session reference
+* source videos
+* originality notes
+
+Do not create a separate Ideas system.
+
+The existing Ideas library must receive the new idea.
+
+## 9. Avoid unnecessary AI calls
+
+Do not call OpenAI repeatedly for the same research session.
+
+If an analysis already exists, show the saved analysis.
+
+Provide an explicit:
+
+"Re-analyze"
+
+action if the user wants a new analysis.
+
+## 10. Error handling
+
+Handle:
+
+* missing OpenAI configuration
+* invalid research session
+* empty research session
+* insufficient research results
+* OpenAI API errors
+* invalid AI structured output
+* database errors
+
+The application must fail gracefully.
+
+Never generate fake fallback analysis.
+
+## 11. AI structured output
+
+Use structured JSON/schema validation.
+
+The AI response should follow a predictable schema so the frontend does not depend on free-form text.
+
+Validate the response before saving it.
+
+## 12. Verification
+
+After implementation:
+
+* Run typecheck
+* Run database migration if required
+* Test the analysis endpoint
+* Test saved analysis retrieval
+* Test insufficient-data behavior
+* Test missing OpenAI configuration behavior
+* Test Create Idea from Opportunity
+* Verify existing Ideas still work
+* Verify Dashboard still works
+* Verify Projects still work
+* Verify Script Studio still works
+* Verify Phase 2A YouTube research still works
+
+Do not implement:
+
+* video generation
+* image generation
+* voice generation
+* FFmpeg editing
+* YouTube upload
+* automatic publishing
+
+Those belong to later phases.
+
+Do not publish the application.
+
+Do not make unnecessary AI calls during verification.
+
+At the end report:
+
+1. Files changed
+2. Database changes
+3. API endpoints added
+4. AI analysis schema
+5. How real data is separated from AI estimates
+6. Tests performed
+7. Remaining limitations
+
+Only implement Phase 2B.
