@@ -1,0 +1,135 @@
+Implement an OpenRouter AI provider for the existing YouTubeStudio project so Phase 2B can run without OpenAI API credits.
+
+IMPORTANT:
+
+* Preserve all existing Phase 2A functionality.
+* Preserve the existing Phase 2B architecture and data models.
+* Do NOT replace the existing OpenAI provider.
+* Add OpenRouter as an additional provider.
+* Do NOT use mock/fake YouTube data.
+* Do NOT expose, print, or log API keys.
+* Do NOT hard-code any API key.
+* Use the existing provider abstraction if one already exists.
+* Make the provider selectable through configuration/environment variables.
+
+Current environment secrets:
+
+* OPENAI_API_KEY exists but has no remaining API credits.
+* YOUTUBE_API_KEY exists and real YouTube research is working.
+* OPENROUTER_API_KEY has now been added to Replit Secrets.
+
+Requirements:
+
+1. Inspect the existing AI provider abstraction and Phase 2B analysis implementation before making changes.
+
+2. Add an OpenRouter provider using:
+   OPENROUTER_API_KEY
+
+3. Use the OpenRouter OpenAI-compatible API rather than introducing an unrelated SDK unless the existing project architecture requires otherwise.
+
+4. Make the AI provider configurable, for example:
+   AI_PROVIDER=openrouter
+
+   Supported values should include at least:
+
+   * openai
+   * openrouter
+
+   Preserve OpenAI as the existing/default-compatible provider unless configuration explicitly selects OpenRouter.
+
+5. For OpenRouter, use a currently available FREE model suitable for:
+
+   * long-form text analysis
+   * structured JSON output
+   * trend analysis
+   * opportunity generation
+   * YouTube research analysis
+
+   Prefer a model that supports structured outputs / JSON schema reliably.
+
+   Do not assume a specific free model is permanently available. Keep the model configurable through an environment variable such as:
+   OPENROUTER_MODEL
+
+   If OPENROUTER_MODEL is not configured, choose a reasonable currently available free model and document the default.
+
+6. Preserve the Phase 2B structured output contract.
+
+The AI response must still produce the existing validated analysis structure, including where applicable:
+
+* trends/patterns
+* original angles
+* opportunities
+* topic
+* title
+* hook
+* why it is an opportunity
+* target audience
+* format
+* duration
+* competition
+* saturation
+* opportunity score
+* confidence
+* evidence
+* source video IDs
+
+Do not weaken schema validation.
+
+7. The AI must clearly distinguish:
+   REAL YOUTUBE DATA
+   from
+   AI ANALYSIS / ESTIMATION.
+
+Never invent YouTube metrics that are not present in the research data.
+
+8. Token/input handling:
+   The saved ResearchSession can contain many YouTube results. Do not blindly send excessive unnecessary fields to the model.
+
+Send only the research information needed for analysis while preserving source IDs and evidence references.
+
+9. Error handling:
+   Handle OpenRouter errors explicitly.
+
+Do not convert provider errors into misleading generic 502 errors.
+
+Return an actionable provider error similar to the existing OpenAI quota handling.
+
+Do not expose API keys, authorization headers, or sensitive provider response contents.
+
+10. Avoid unnecessary repeated AI calls.
+
+Preserve the existing saved-analysis/re-analysis behavior.
+
+11. Verification:
+
+After implementation, test with the existing saved ResearchSession containing the 25 real YouTube videos.
+
+Verify:
+
+A. Research session retrieval works.
+B. Phase 2A YouTube search still works.
+C. Analyze saved results succeeds using OpenRouter.
+D. A valid analysis is saved to the database.
+E. Trends/patterns are produced from the actual saved research.
+F. Original angles are produced.
+G. Opportunities are generated.
+H. Opportunity scores/confidence/evidence are present.
+I. Source video IDs correspond to the actual research results.
+J. Create Idea works from an opportunity.
+K. A repeated analysis follows the existing deduplication/re-analysis behavior.
+L. No fake YouTube data is introduced.
+M. No secrets appear in logs or responses.
+N. Typecheck passes.
+O. Build passes.
+
+12. Do not move on to video generation, image generation, voice generation, FFmpeg editing, or YouTube publishing yet.
+
+This task is only about making the existing Phase 2B AI analysis work through the additional OpenRouter provider while preserving the current architecture.
+
+At the end, provide a concise report containing:
+
+* files changed
+* OpenRouter model selected/defaulted
+* provider selection mechanism
+* verification results
+* any remaining limitation caused by the free model/provider.

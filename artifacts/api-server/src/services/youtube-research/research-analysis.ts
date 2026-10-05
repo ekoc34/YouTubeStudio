@@ -17,6 +17,7 @@ import {
 import { logger } from "../../lib/logger";
 import {
   AIConfigurationError,
+  AIProviderRequestError,
   createStructuredAIProvider,
 } from "../content-strategist/provider";
 import {
@@ -89,8 +90,8 @@ type OpportunityDraft = z.infer<typeof opportunityDraftSchema>;
 type GeneratedAnalysis = z.infer<typeof generatedAnalysisSchema>;
 
 export class ResearchAIProviderError extends Error {
-  constructor() {
-    super("AI analysis could not be completed. Try again later.");
+  constructor(message = "AI analysis could not be completed. Try again later.") {
+    super(message);
     this.name = "ResearchAIProviderError";
   }
 }
@@ -111,15 +112,84 @@ export class ResearchAIOutputError extends Error {
   }
 }
 
-function sanitizeProviderErrorMessage(message: string): string {
-  return message
-    .replace(/\bsk-[A-Za-z0-9_-]{8,}\b/g, "[redacted]")
-    .replace(/\bBearer\s+\S+/gi, "Bearer [redacted]")
-    .replace(
-      /\b(?:api[_-]?key|authorization)\s*[:=]\s*['"]?[^,\s'"]+/gi,
-      "credential=[redacted]",
-    )
-    .slice(0, 500);
+function safeProviderCode(value: unknown): string | undefined {
+  return typeof value === "string" && /^[A-Za-z0-9_.-]{1,80}$/.test(value)
+    ? value
+    : undefined;
+}
+
+const SAFE_ANALYSIS_PATH_SEGMENTS = new Set([
+  "analysis",
+  "opportunities",
+  "summary",
+  "dataSufficiency",
+  "sufficiencyNote",
+  "frequentTopics",
+  "recurringTopics",
+  "recurringFormats",
+  "commonTitlePatterns",
+  "commonHookPatterns",
+  "commonKeywords",
+  "durationPatterns",
+  "audienceSignals",
+  "saturationSignals",
+  "contentGaps",
+  "analysisLabel",
+  "insight",
+  "evidence",
+  "sourceVideoIds",
+  "confidence",
+  "topic",
+  "suggestedTitle",
+  "suggestedHook",
+  "whyInteresting",
+  "targetAudience",
+  "suggestedFormat",
+  "suggestedDurationSeconds",
+  "competitionLevel",
+  "observedPatterns",
+  "saturationEvidence",
+  "originalityAngle",
+  "potentialScore",
+  "scoreReason",
+  "originalityConsiderations",
+]);
+
+function summarizeOutputError(error: unknown): Record<string, unknown> {
+  if (!(error instanceof z.ZodError)) return summarizeProviderError(error);
+  const issues = error.issues.slice(0, 30);
+  const issueCodes = [
+    ...new Set(
+      issues.flatMap((issue) => {
+        const code = safeProviderCode(issue.code);
+        return code ? [code] : [];
+      }),
+    ),
+  ];
+  const issuePaths = [
+    ...new Set(
+      issues.map((issue) =>
+        issue.path
+          .map((segment) => {
+            if (typeof segment === "number") {
+              return Number.isInteger(segment) && segment >= 0 && segment < 25
+                ? String(segment)
+                : "*";
+            }
+            return SAFE_ANALYSIS_PATH_SEGMENTS.has(String(segment))
+              ? String(segment)
+              : "[other]";
+          })
+          .join("."),
+      ),
+    ),
+  ];
+  return {
+    errorName: error.name,
+    issueCount: error.issues.length,
+    issueCodes,
+    issuePaths,
+  };
 }
 
 function summarizeProviderError(error: unknown): Record<string, unknown> {
@@ -129,24 +199,24 @@ function summarizeProviderError(error: unknown): Record<string, unknown> {
 
   const providerError = error as Error & {
     code?: unknown;
-    param?: unknown;
+    providerName?: unknown;
     status?: unknown;
     type?: unknown;
   };
   return {
     errorName: error.name,
-    message: sanitizeProviderErrorMessage(error.message),
+    ...(providerError.providerName === "openai" ||
+    providerError.providerName === "openrouter"
+      ? { providerName: providerError.providerName }
+      : {}),
     ...(typeof providerError.status === "number"
       ? { status: providerError.status }
       : {}),
-    ...(typeof providerError.code === "string"
-      ? { code: providerError.code }
+    ...(safeProviderCode(providerError.code)
+      ? { code: safeProviderCode(providerError.code) }
       : {}),
-    ...(typeof providerError.type === "string"
-      ? { type: providerError.type }
-      : {}),
-    ...(typeof providerError.param === "string"
-      ? { param: providerError.param }
+    ...(safeProviderCode(providerError.type)
+      ? { type: safeProviderCode(providerError.type) }
       : {}),
   };
 }
@@ -286,6 +356,18 @@ async function generateAnalysis(
     });
   } catch (error) {
     if (error instanceof AIConfigurationError) throw error;
+    if (error instanceof AIProviderRequestError) {
+      logger.warn(
+        {
+          providerName: error.providerName,
+          status: error.status,
+          code: error.code,
+          videoCount: videos.length,
+        },
+        "AI provider request failed",
+      );
+      throw new ResearchAIProviderError(error.message);
+    }
     if (isOpenAIQuotaError(error)) {
       logger.warn(
         { providerError: summarizeProviderError(error), videoCount: videos.length },
@@ -298,7 +380,7 @@ async function generateAnalysis(
       (error instanceof Error && error.name === "ZodError")
     ) {
       logger.warn(
-        { outputError: summarizeProviderError(error), videoCount: videos.length },
+        { outputError: summarizeOutputError(error), videoCount: videos.length },
         "Structured AI output could not be parsed or validated",
       );
       throw new ResearchAIOutputError();

@@ -18,6 +18,25 @@ export class AIConfigurationError extends Error {
   }
 }
 
+export class AIProviderRequestError extends Error {
+  readonly providerName: "openai" | "openrouter";
+  readonly status: number | undefined;
+  readonly code: string | undefined;
+
+  constructor(
+    providerName: "openai" | "openrouter",
+    message: string,
+    status?: number,
+    code?: string,
+  ) {
+    super(message);
+    this.name = "AIProviderRequestError";
+    this.providerName = providerName;
+    this.status = status;
+    this.code = code;
+  }
+}
+
 export class OpenAIProvider implements StructuredAIProvider {
   private readonly client: OpenAI;
   private readonly model: string;
@@ -50,12 +69,131 @@ export class OpenAIProvider implements StructuredAIProvider {
   }
 }
 
+function openRouterErrorMetadata(error: unknown): {
+  status?: number;
+  code?: string;
+} {
+  if (!error || typeof error !== "object") return {};
+  const providerError = error as { code?: unknown; status?: unknown };
+  const code =
+    typeof providerError.code === "string" &&
+    /^[A-Za-z0-9_.-]{1,80}$/.test(providerError.code)
+      ? providerError.code
+      : undefined;
+  return {
+    ...(typeof providerError.status === "number"
+      ? { status: providerError.status }
+      : {}),
+    ...(code ? { code } : {}),
+  };
+}
+
+function toOpenRouterRequestError(error: unknown): AIProviderRequestError {
+  const { status, code } = openRouterErrorMetadata(error);
+  const normalizedCode = code?.toLowerCase() ?? "";
+  let message: string;
+
+  if (status === 401 || status === 403) {
+    message =
+      "OpenRouter could not authenticate this request. Check that OPENROUTER_API_KEY is configured correctly.";
+  } else if (
+    status === 402 ||
+    normalizedCode.includes("insufficient_quota") ||
+    normalizedCode.includes("credit_balance")
+  ) {
+    message =
+      "OpenRouter has no available credits for this request. Check the account or free-model limits, then retry.";
+  } else if (status === 429 || normalizedCode.includes("rate_limit")) {
+    message =
+      "OpenRouter rate limits were reached. Wait briefly and retry; free-model availability can vary.";
+  } else if (status === 400 || status === 404) {
+    message =
+      "The configured OpenRouter model or structured-output format is unavailable. Choose a supported OPENROUTER_MODEL and retry.";
+  } else if (status != null && status >= 500) {
+    message = "OpenRouter is temporarily unavailable. Try again later.";
+  } else {
+    message =
+      "The OpenRouter request could not be completed. Check provider settings and model availability, then retry.";
+  }
+
+  return new AIProviderRequestError("openrouter", message, status, code);
+}
+
+// This router selects a currently available free model that supports the requested response features.
+export const DEFAULT_OPENROUTER_MODEL = "openrouter/free";
+
+export class OpenRouterProvider implements StructuredAIProvider {
+  private readonly client: OpenAI;
+  private readonly model: string;
+
+  constructor(apiKey: string, model: string) {
+    this.client = new OpenAI({
+      apiKey,
+      baseURL: "https://openrouter.ai/api/v1",
+      maxRetries: 0,
+    });
+    this.model = model;
+  }
+
+  async generateStructured<T>(request: StructuredGenerationRequest<T>): Promise<T> {
+    let response: OpenAI.Chat.Completions.ChatCompletion;
+    try {
+      const { $schema: _schemaVersion, ...jsonSchema } = z.toJSONSchema(
+        request.schema,
+      );
+      response = await this.client.chat.completions.create({
+        model: this.model,
+        max_tokens: 8192,
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "structured_response",
+            strict: true,
+            schema: jsonSchema,
+          },
+        },
+        messages: [
+          {
+            role: "system",
+            content: `${request.task}\nReturn only a valid JSON object matching the requested fields. Do not wrap it in markdown.`,
+          },
+          { role: "user", content: request.input },
+        ],
+      });
+    } catch (error) {
+      throw toOpenRouterRequestError(error);
+    }
+
+    const content = response.choices[0]?.message.content;
+    if (!content) {
+      throw new Error("The AI provider returned an empty response.");
+    }
+
+    return request.schema.parse(JSON.parse(content) as unknown);
+  }
+}
+
 export function createStructuredAIProvider(): StructuredAIProvider {
-  const providerName = process.env.CONTENT_STRATEGIST_PROVIDER ?? "openai";
+  const providerName =
+    process.env.AI_PROVIDER?.trim() ||
+    process.env.CONTENT_STRATEGIST_PROVIDER?.trim() ||
+    "openai";
+
+  if (providerName === "openrouter") {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      throw new AIConfigurationError(
+        "OPENROUTER_API_KEY is missing. Add it through Replit Secrets to enable OpenRouter AI generation.",
+      );
+    }
+    const model =
+      process.env.OPENROUTER_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL;
+    return new OpenRouterProvider(apiKey, model);
+  }
 
   if (providerName !== "openai") {
     throw new AIConfigurationError(
-      `The configured content strategist provider "${providerName}" is not installed.`,
+      `Unsupported AI provider "${providerName}". Set AI_PROVIDER to "openai" or "openrouter".`,
     );
   }
 

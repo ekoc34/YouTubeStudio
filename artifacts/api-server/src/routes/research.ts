@@ -96,20 +96,24 @@ function sendAnalysisError(res: Response, error: unknown): void {
     return;
   }
   if (error instanceof AIConfigurationError) {
-    res.status(503).json({
-      error: "AI analysis is not configured. Add OPENAI_API_KEY through Replit Secrets to analyze trends.",
-    });
+    res.status(503).json({ error: error.message });
     return;
   }
   if (error instanceof ResearchAIQuotaError) {
     res.status(503).json({ error: error.message });
     return;
   }
-  if (
-    error instanceof ResearchAIProviderError ||
-    error instanceof ResearchAIOutputError
-  ) {
-    console.error("Research analysis failed", error);
+  if (error instanceof ResearchAIProviderError) {
+    console.error("Research analysis provider is unavailable", {
+      errorName: error.name,
+    });
+    res.status(503).json({ error: error.message });
+    return;
+  }
+  if (error instanceof ResearchAIOutputError) {
+    console.error("Research analysis returned invalid structured output", {
+      errorName: error.name,
+    });
     res.status(502).json({ error: error.message });
     return;
   }
