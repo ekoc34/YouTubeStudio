@@ -1,0 +1,91 @@
+First, inspect the entire existing YouTubeStudio project before making any changes.
+
+We previously started implementing Phase 2:
+**YouTube Research & Trend Intelligence Agent**
+
+The implementation was interrupted because the previous Replit account ran out of credits.
+
+This project was then moved to GitHub and imported into this new Replit account.
+
+IMPORTANT:
+
+* Do NOT rewrite existing functionality.
+* Do NOT start implementing anything yet.
+* Do NOT create duplicate models, routes, components, or services.
+* Do NOT make unnecessary changes.
+* Do NOT make paid AI requests during this inspection.
+
+Your task right now is ONLY to audit the current codebase and determine exactly where the previous implementation stopped.
+
+Inspect:
+
+1. Existing database schema and migrations
+2. Existing YouTube research models/tables
+3. Existing Research UI/pages/components
+4. Existing API routes related to research
+5. Existing YouTube API/provider code
+6. Existing OpenAI provider and AI Strategist
+7. Existing trend-analysis logic
+8. Existing opportunity-finder logic
+9. Existing channel/video research logic
+10. Existing Idea → Research integration
+11. Existing environment variables / required Secrets
+12. Existing package dependencies
+13. Existing unfinished TODOs
+14. Existing TypeScript/type errors
+15. Existing tests
+
+Compare what currently exists against the intended Phase 2 requirements:
+
+* Research dashboard
+* YouTube Data API integration
+* Video search
+* Video details
+* Channel research
+* Trend intelligence
+* Competitor/channel analysis
+* Opportunity Finder
+* Research → Idea integration
+* Research history
+* PostgreSQL persistence
+* AI analysis using the existing OpenAI provider
+* Clear distinction between real YouTube data and AI estimates
+* No fake statistics or fabricated trends
+
+Then provide a clear report with these sections:
+
+### 1. Already implemented
+
+List everything that is fully working.
+
+### 2. Partially implemented
+
+List features that exist but are incomplete.
+
+### 3. Not implemented
+
+List features that are completely missing.
+
+### 4. Broken / needs fixing
+
+List errors, incomplete integrations, type errors, database issues, or broken UI/API connections.
+
+### 5. Required Secrets
+
+List which environment variables/Secrets are currently required and which ones are missing.
+
+Never reveal the actual values of any secrets.
+
+### 6. Exact continuation point
+
+Tell me exactly where the previous implementation stopped and what the next development task should be.
+
+### 7. Recommended implementation order
+
+Give us a logical order for completing the remaining Phase 2 work.
+
+At the end, explicitly state:
+
+"NO CODE CHANGES WERE MADE DURING THIS AUDIT."
+
+Do not implement anything until I give you the next instruction.
