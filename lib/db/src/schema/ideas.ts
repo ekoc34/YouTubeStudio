@@ -1,5 +1,12 @@
 import { createInsertSchema } from "drizzle-zod";
-import { pgEnum, pgTable, text, timestamp, uuid, integer } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { z } from "zod/v4";
 
 export const ideaStatusEnum = pgEnum("idea_status", [
@@ -10,7 +17,11 @@ export const ideaStatusEnum = pgEnum("idea_status", [
   "SCRIPTING",
   "READY",
 ]);
-export const ideaSourceEnum = pgEnum("idea_source", ["MANUAL", "STRATEGIST"]);
+export const ideaSourceEnum = pgEnum("idea_source", [
+  "MANUAL",
+  "STRATEGIST",
+  "RESEARCH",
+]);
 
 export const ideasTable = pgTable("content_ideas", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -26,6 +37,12 @@ export const ideasTable = pgTable("content_ideas", {
   rationale: text("rationale"),
   weaknesses: text("weaknesses").array().notNull().default([]),
   improvements: text("improvements").array().notNull().default([]),
+  opportunityScore: integer("opportunity_score"),
+  researchEvidence: text("research_evidence"),
+  originalityConsiderations: text("originality_considerations")
+    .array()
+    .notNull()
+    .default([]),
   source: ideaSourceEnum("source").notNull().default("MANUAL"),
   status: ideaStatusEnum("status").notNull().default("NEW"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

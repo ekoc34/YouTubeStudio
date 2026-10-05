@@ -26,6 +26,9 @@ export const getDashboardResponseRecentIdeasItemViralScoreMax = 100;
 export const getDashboardResponseRecentIdeasItemOriginalityScoreMin = 0;
 export const getDashboardResponseRecentIdeasItemOriginalityScoreMax = 100;
 
+export const getDashboardResponseRecentIdeasItemOpportunityScoreMin = 0;
+export const getDashboardResponseRecentIdeasItemOpportunityScoreMax = 100;
+
 
 
 export const GetDashboardResponse = zod.object({
@@ -75,7 +78,10 @@ export const GetDashboardResponse = zod.object({
   "rationale": zod.string().nullable(),
   "weaknesses": zod.array(zod.string()),
   "improvements": zod.array(zod.string()),
-  "source": zod.enum(['MANUAL', 'STRATEGIST']),
+  "opportunityScore": zod.number().int().min(getDashboardResponseRecentIdeasItemOpportunityScoreMin).max(getDashboardResponseRecentIdeasItemOpportunityScoreMax).nullable(),
+  "researchEvidence": zod.string().nullable(),
+  "originalityConsiderations": zod.array(zod.string()),
+  "source": zod.enum(['MANUAL', 'STRATEGIST', 'RESEARCH']),
   "status": zod.enum(['NEW', 'RESEARCHING', 'APPROVED', 'REJECTED', 'SCRIPTING', 'READY']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -101,6 +107,9 @@ export const listIdeasResponseViralScoreMax = 100;
 export const listIdeasResponseOriginalityScoreMin = 0;
 export const listIdeasResponseOriginalityScoreMax = 100;
 
+export const listIdeasResponseOpportunityScoreMin = 0;
+export const listIdeasResponseOpportunityScoreMax = 100;
+
 
 
 export const ListIdeasResponseItem = zod.object({
@@ -117,7 +126,10 @@ export const ListIdeasResponseItem = zod.object({
   "rationale": zod.string().nullable(),
   "weaknesses": zod.array(zod.string()),
   "improvements": zod.array(zod.string()),
-  "source": zod.enum(['MANUAL', 'STRATEGIST']),
+  "opportunityScore": zod.number().int().min(listIdeasResponseOpportunityScoreMin).max(listIdeasResponseOpportunityScoreMax).nullable(),
+  "researchEvidence": zod.string().nullable(),
+  "originalityConsiderations": zod.array(zod.string()),
+  "source": zod.enum(['MANUAL', 'STRATEGIST', 'RESEARCH']),
   "status": zod.enum(['NEW', 'RESEARCHING', 'APPROVED', 'REJECTED', 'SCRIPTING', 'READY']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -161,6 +173,9 @@ export const createIdeaResponseViralScoreMax = 100;
 export const createIdeaResponseOriginalityScoreMin = 0;
 export const createIdeaResponseOriginalityScoreMax = 100;
 
+export const createIdeaResponseOpportunityScoreMin = 0;
+export const createIdeaResponseOpportunityScoreMax = 100;
+
 
 
 export const CreateIdeaResponse = zod.object({
@@ -177,7 +192,10 @@ export const CreateIdeaResponse = zod.object({
   "rationale": zod.string().nullable(),
   "weaknesses": zod.array(zod.string()),
   "improvements": zod.array(zod.string()),
-  "source": zod.enum(['MANUAL', 'STRATEGIST']),
+  "opportunityScore": zod.number().int().min(createIdeaResponseOpportunityScoreMin).max(createIdeaResponseOpportunityScoreMax).nullable(),
+  "researchEvidence": zod.string().nullable(),
+  "originalityConsiderations": zod.array(zod.string()),
+  "source": zod.enum(['MANUAL', 'STRATEGIST', 'RESEARCH']),
   "status": zod.enum(['NEW', 'RESEARCHING', 'APPROVED', 'REJECTED', 'SCRIPTING', 'READY']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -197,6 +215,9 @@ export const getIdeaResponseViralScoreMax = 100;
 export const getIdeaResponseOriginalityScoreMin = 0;
 export const getIdeaResponseOriginalityScoreMax = 100;
 
+export const getIdeaResponseOpportunityScoreMin = 0;
+export const getIdeaResponseOpportunityScoreMax = 100;
+
 
 
 export const GetIdeaResponse = zod.object({
@@ -213,7 +234,10 @@ export const GetIdeaResponse = zod.object({
   "rationale": zod.string().nullable(),
   "weaknesses": zod.array(zod.string()),
   "improvements": zod.array(zod.string()),
-  "source": zod.enum(['MANUAL', 'STRATEGIST']),
+  "opportunityScore": zod.number().int().min(getIdeaResponseOpportunityScoreMin).max(getIdeaResponseOpportunityScoreMax).nullable(),
+  "researchEvidence": zod.string().nullable(),
+  "originalityConsiderations": zod.array(zod.string()),
+  "source": zod.enum(['MANUAL', 'STRATEGIST', 'RESEARCH']),
   "status": zod.enum(['NEW', 'RESEARCHING', 'APPROVED', 'REJECTED', 'SCRIPTING', 'READY']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -261,6 +285,9 @@ export const updateIdeaResponseViralScoreMax = 100;
 export const updateIdeaResponseOriginalityScoreMin = 0;
 export const updateIdeaResponseOriginalityScoreMax = 100;
 
+export const updateIdeaResponseOpportunityScoreMin = 0;
+export const updateIdeaResponseOpportunityScoreMax = 100;
+
 
 
 export const UpdateIdeaResponse = zod.object({
@@ -277,7 +304,10 @@ export const UpdateIdeaResponse = zod.object({
   "rationale": zod.string().nullable(),
   "weaknesses": zod.array(zod.string()),
   "improvements": zod.array(zod.string()),
-  "source": zod.enum(['MANUAL', 'STRATEGIST']),
+  "opportunityScore": zod.number().int().min(updateIdeaResponseOpportunityScoreMin).max(updateIdeaResponseOpportunityScoreMax).nullable(),
+  "researchEvidence": zod.string().nullable(),
+  "originalityConsiderations": zod.array(zod.string()),
+  "source": zod.enum(['MANUAL', 'STRATEGIST', 'RESEARCH']),
   "status": zod.enum(['NEW', 'RESEARCHING', 'APPROVED', 'REJECTED', 'SCRIPTING', 'READY']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -321,6 +351,9 @@ export const generateIdeasResponseViralScoreMax = 100;
 export const generateIdeasResponseOriginalityScoreMin = 0;
 export const generateIdeasResponseOriginalityScoreMax = 100;
 
+export const generateIdeasResponseOpportunityScoreMin = 0;
+export const generateIdeasResponseOpportunityScoreMax = 100;
+
 
 
 export const GenerateIdeasResponseItem = zod.object({
@@ -337,7 +370,10 @@ export const GenerateIdeasResponseItem = zod.object({
   "rationale": zod.string().nullable(),
   "weaknesses": zod.array(zod.string()),
   "improvements": zod.array(zod.string()),
-  "source": zod.enum(['MANUAL', 'STRATEGIST']),
+  "opportunityScore": zod.number().int().min(generateIdeasResponseOpportunityScoreMin).max(generateIdeasResponseOpportunityScoreMax).nullable(),
+  "researchEvidence": zod.string().nullable(),
+  "originalityConsiderations": zod.array(zod.string()),
+  "source": zod.enum(['MANUAL', 'STRATEGIST', 'RESEARCH']),
   "status": zod.enum(['NEW', 'RESEARCHING', 'APPROVED', 'REJECTED', 'SCRIPTING', 'READY']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -392,6 +428,1046 @@ export const AnalyzeIdeaResponse = zod.object({
   "weaknesses": zod.array(zod.string()),
   "improvements": zod.array(zod.string())
 })
+
+
+/**
+ * @summary Check research provider availability
+ */
+export const GetResearchStatusResponse = zod.object({
+  "youtubeConfigured": zod.boolean(),
+  "aiConfigured": zod.boolean()
+})
+
+
+/**
+ * @summary List recent research sessions
+ */
+export const ListResearchSessionsResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "kind": zod.enum(['SEARCH', 'POPULAR', 'CHANNEL']),
+  "query": zod.string(),
+  "filters": zod.object({
+  "language": zod.string().nullable(),
+  "region": zod.string().nullable(),
+  "contentType": zod.enum(['SHORTS', 'LONG_FORM', 'BOTH']),
+  "timeRange": zod.enum(['TODAY', 'WEEK', 'MONTH', 'CUSTOM', 'ALL_TIME']),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable()
+}),
+  "status": zod.enum(['RUNNING', 'COMPLETED', 'FAILED']),
+  "resultCount": zod.number().int(),
+  "dataSource": zod.string(),
+  "errorMessage": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "retrievedAt": zod.coerce.date().nullable()
+})
+export const ListResearchSessionsResponse = zod.array(ListResearchSessionsResponseItem)
+
+
+/**
+ * @summary Open a saved research session
+ */
+export const GetResearchSessionParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const getResearchSessionResponseOpportunitiesItemPotentialScoreMin = 0;
+export const getResearchSessionResponseOpportunitiesItemPotentialScoreMax = 100;
+
+
+
+export const GetResearchSessionResponse = zod.object({
+  "session": zod.object({
+  "id": zod.string().uuid(),
+  "kind": zod.enum(['SEARCH', 'POPULAR', 'CHANNEL']),
+  "query": zod.string(),
+  "filters": zod.object({
+  "language": zod.string().nullable(),
+  "region": zod.string().nullable(),
+  "contentType": zod.enum(['SHORTS', 'LONG_FORM', 'BOTH']),
+  "timeRange": zod.enum(['TODAY', 'WEEK', 'MONTH', 'CUSTOM', 'ALL_TIME']),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable()
+}),
+  "status": zod.enum(['RUNNING', 'COMPLETED', 'FAILED']),
+  "resultCount": zod.number().int(),
+  "dataSource": zod.string(),
+  "errorMessage": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "retrievedAt": zod.coerce.date().nullable()
+}),
+  "videos": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "videoId": zod.string(),
+  "title": zod.string(),
+  "channelId": zod.string(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "durationSeconds": zod.number().int().nullable(),
+  "url": zod.string().url(),
+  "thumbnailUrl": zod.string().url().nullable(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})),
+  "channel": zod.union([zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "channelId": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "customUrl": zod.string().nullable(),
+  "thumbnailUrl": zod.string().url().nullable(),
+  "subscriberCount": zod.number().int().nullable(),
+  "viewCount": zod.number().int().nullable(),
+  "videoCount": zod.number().int().nullable(),
+  "averageRecentViews": zod.number().nullable(),
+  "averageViewsSampleSize": zod.number().int(),
+  "retrievedAt": zod.coerce.date()
+}),zod.null()]),
+  "trendAnalysis": zod.union([zod.object({
+  "summary": zod.string(),
+  "frequentTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "risingTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedFormats": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "commonHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "lengthPatterns": zod.array(zod.string()),
+  "titleStructures": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "audienceInterests": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "analysisLabel": zod.string()
+}),zod.null()]),
+  "channelAnalysis": zod.union([zod.object({
+  "summary": zod.string(),
+  "strengths": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedPatterns": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "strongHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "weaknesses": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityReminder": zod.string()
+}),zod.null()]),
+  "opportunities": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "topic": zod.string(),
+  "evidence": zod.string(),
+  "whyInteresting": zod.string(),
+  "competitionLevel": zod.enum(['LOW', 'MEDIUM', 'HIGH', 'UNKNOWN']),
+  "suggestedFormat": zod.string(),
+  "suggestedHook": zod.string(),
+  "potentialScore": zod.number().int().min(getResearchSessionResponseOpportunitiesItemPotentialScoreMin).max(getResearchSessionResponseOpportunitiesItemPotentialScoreMax),
+  "scoreReason": zod.string(),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH']),
+  "originalityConsiderations": zod.array(zod.string()),
+  "sourceVideos": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "videoId": zod.string().nullable(),
+  "title": zod.string(),
+  "channelId": zod.string().nullable(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "url": zod.string().url(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})),
+  "scoreLabel": zod.string()
+}))
+})
+
+
+/**
+ * @summary Search real YouTube videos and save a research session
+ */
+export const searchResearchBodyQueryMax = 200;
+
+export const searchResearchBodyLanguageMin = 2;
+export const searchResearchBodyLanguageMax = 10;
+
+export const searchResearchBodyRegionMin = 2;
+export const searchResearchBodyRegionMax = 2;
+
+
+
+export const SearchResearchBody = zod.object({
+  "query": zod.string().min(1).max(searchResearchBodyQueryMax),
+  "language": zod.string().min(searchResearchBodyLanguageMin).max(searchResearchBodyLanguageMax),
+  "region": zod.string().min(searchResearchBodyRegionMin).max(searchResearchBodyRegionMax),
+  "contentType": zod.enum(['SHORTS', 'LONG_FORM', 'BOTH']),
+  "timeRange": zod.enum(['TODAY', 'WEEK', 'MONTH', 'CUSTOM']),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable()
+})
+
+export const searchResearchResponseOpportunitiesItemPotentialScoreMin = 0;
+export const searchResearchResponseOpportunitiesItemPotentialScoreMax = 100;
+
+
+
+export const SearchResearchResponse = zod.object({
+  "session": zod.object({
+  "id": zod.string().uuid(),
+  "kind": zod.enum(['SEARCH', 'POPULAR', 'CHANNEL']),
+  "query": zod.string(),
+  "filters": zod.object({
+  "language": zod.string().nullable(),
+  "region": zod.string().nullable(),
+  "contentType": zod.enum(['SHORTS', 'LONG_FORM', 'BOTH']),
+  "timeRange": zod.enum(['TODAY', 'WEEK', 'MONTH', 'CUSTOM', 'ALL_TIME']),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable()
+}),
+  "status": zod.enum(['RUNNING', 'COMPLETED', 'FAILED']),
+  "resultCount": zod.number().int(),
+  "dataSource": zod.string(),
+  "errorMessage": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "retrievedAt": zod.coerce.date().nullable()
+}),
+  "videos": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "videoId": zod.string(),
+  "title": zod.string(),
+  "channelId": zod.string(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "durationSeconds": zod.number().int().nullable(),
+  "url": zod.string().url(),
+  "thumbnailUrl": zod.string().url().nullable(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})),
+  "channel": zod.union([zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "channelId": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "customUrl": zod.string().nullable(),
+  "thumbnailUrl": zod.string().url().nullable(),
+  "subscriberCount": zod.number().int().nullable(),
+  "viewCount": zod.number().int().nullable(),
+  "videoCount": zod.number().int().nullable(),
+  "averageRecentViews": zod.number().nullable(),
+  "averageViewsSampleSize": zod.number().int(),
+  "retrievedAt": zod.coerce.date()
+}),zod.null()]),
+  "trendAnalysis": zod.union([zod.object({
+  "summary": zod.string(),
+  "frequentTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "risingTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedFormats": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "commonHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "lengthPatterns": zod.array(zod.string()),
+  "titleStructures": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "audienceInterests": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "analysisLabel": zod.string()
+}),zod.null()]),
+  "channelAnalysis": zod.union([zod.object({
+  "summary": zod.string(),
+  "strengths": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedPatterns": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "strongHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "weaknesses": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityReminder": zod.string()
+}),zod.null()]),
+  "opportunities": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "topic": zod.string(),
+  "evidence": zod.string(),
+  "whyInteresting": zod.string(),
+  "competitionLevel": zod.enum(['LOW', 'MEDIUM', 'HIGH', 'UNKNOWN']),
+  "suggestedFormat": zod.string(),
+  "suggestedHook": zod.string(),
+  "potentialScore": zod.number().int().min(searchResearchResponseOpportunitiesItemPotentialScoreMin).max(searchResearchResponseOpportunitiesItemPotentialScoreMax),
+  "scoreReason": zod.string(),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH']),
+  "originalityConsiderations": zod.array(zod.string()),
+  "sourceVideos": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "videoId": zod.string().nullable(),
+  "title": zod.string(),
+  "channelId": zod.string().nullable(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "url": zod.string().url(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})),
+  "scoreLabel": zod.string()
+}))
+})
+
+
+/**
+ * @summary Retrieve YouTube's real most-popular chart for a region
+ */
+export const getTrendingResearchBodyRegionMin = 2;
+export const getTrendingResearchBodyRegionMax = 2;
+
+
+
+export const GetTrendingResearchBody = zod.object({
+  "region": zod.string().min(getTrendingResearchBodyRegionMin).max(getTrendingResearchBodyRegionMax),
+  "contentType": zod.enum(['SHORTS', 'LONG_FORM', 'BOTH'])
+})
+
+export const getTrendingResearchResponseOpportunitiesItemPotentialScoreMin = 0;
+export const getTrendingResearchResponseOpportunitiesItemPotentialScoreMax = 100;
+
+
+
+export const GetTrendingResearchResponse = zod.object({
+  "session": zod.object({
+  "id": zod.string().uuid(),
+  "kind": zod.enum(['SEARCH', 'POPULAR', 'CHANNEL']),
+  "query": zod.string(),
+  "filters": zod.object({
+  "language": zod.string().nullable(),
+  "region": zod.string().nullable(),
+  "contentType": zod.enum(['SHORTS', 'LONG_FORM', 'BOTH']),
+  "timeRange": zod.enum(['TODAY', 'WEEK', 'MONTH', 'CUSTOM', 'ALL_TIME']),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable()
+}),
+  "status": zod.enum(['RUNNING', 'COMPLETED', 'FAILED']),
+  "resultCount": zod.number().int(),
+  "dataSource": zod.string(),
+  "errorMessage": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "retrievedAt": zod.coerce.date().nullable()
+}),
+  "videos": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "videoId": zod.string(),
+  "title": zod.string(),
+  "channelId": zod.string(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "durationSeconds": zod.number().int().nullable(),
+  "url": zod.string().url(),
+  "thumbnailUrl": zod.string().url().nullable(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})),
+  "channel": zod.union([zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "channelId": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "customUrl": zod.string().nullable(),
+  "thumbnailUrl": zod.string().url().nullable(),
+  "subscriberCount": zod.number().int().nullable(),
+  "viewCount": zod.number().int().nullable(),
+  "videoCount": zod.number().int().nullable(),
+  "averageRecentViews": zod.number().nullable(),
+  "averageViewsSampleSize": zod.number().int(),
+  "retrievedAt": zod.coerce.date()
+}),zod.null()]),
+  "trendAnalysis": zod.union([zod.object({
+  "summary": zod.string(),
+  "frequentTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "risingTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedFormats": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "commonHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "lengthPatterns": zod.array(zod.string()),
+  "titleStructures": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "audienceInterests": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "analysisLabel": zod.string()
+}),zod.null()]),
+  "channelAnalysis": zod.union([zod.object({
+  "summary": zod.string(),
+  "strengths": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedPatterns": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "strongHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "weaknesses": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityReminder": zod.string()
+}),zod.null()]),
+  "opportunities": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "topic": zod.string(),
+  "evidence": zod.string(),
+  "whyInteresting": zod.string(),
+  "competitionLevel": zod.enum(['LOW', 'MEDIUM', 'HIGH', 'UNKNOWN']),
+  "suggestedFormat": zod.string(),
+  "suggestedHook": zod.string(),
+  "potentialScore": zod.number().int().min(getTrendingResearchResponseOpportunitiesItemPotentialScoreMin).max(getTrendingResearchResponseOpportunitiesItemPotentialScoreMax),
+  "scoreReason": zod.string(),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH']),
+  "originalityConsiderations": zod.array(zod.string()),
+  "sourceVideos": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "videoId": zod.string().nullable(),
+  "title": zod.string(),
+  "channelId": zod.string().nullable(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "url": zod.string().url(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})),
+  "scoreLabel": zod.string()
+}))
+})
+
+
+/**
+ * @summary Fetch a channel and its recent public videos
+ */
+export const researchChannelBodyChannelUrlOrIdMin = 3;
+export const researchChannelBodyChannelUrlOrIdMax = 300;
+
+
+
+export const ResearchChannelBody = zod.object({
+  "channelUrlOrId": zod.string().min(researchChannelBodyChannelUrlOrIdMin).max(researchChannelBodyChannelUrlOrIdMax)
+})
+
+export const researchChannelResponseOpportunitiesItemPotentialScoreMin = 0;
+export const researchChannelResponseOpportunitiesItemPotentialScoreMax = 100;
+
+
+
+export const ResearchChannelResponse = zod.object({
+  "session": zod.object({
+  "id": zod.string().uuid(),
+  "kind": zod.enum(['SEARCH', 'POPULAR', 'CHANNEL']),
+  "query": zod.string(),
+  "filters": zod.object({
+  "language": zod.string().nullable(),
+  "region": zod.string().nullable(),
+  "contentType": zod.enum(['SHORTS', 'LONG_FORM', 'BOTH']),
+  "timeRange": zod.enum(['TODAY', 'WEEK', 'MONTH', 'CUSTOM', 'ALL_TIME']),
+  "startDate": zod.coerce.date().nullable(),
+  "endDate": zod.coerce.date().nullable()
+}),
+  "status": zod.enum(['RUNNING', 'COMPLETED', 'FAILED']),
+  "resultCount": zod.number().int(),
+  "dataSource": zod.string(),
+  "errorMessage": zod.string().nullable(),
+  "createdAt": zod.coerce.date(),
+  "retrievedAt": zod.coerce.date().nullable()
+}),
+  "videos": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "videoId": zod.string(),
+  "title": zod.string(),
+  "channelId": zod.string(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "durationSeconds": zod.number().int().nullable(),
+  "url": zod.string().url(),
+  "thumbnailUrl": zod.string().url().nullable(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})),
+  "channel": zod.union([zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "channelId": zod.string(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "customUrl": zod.string().nullable(),
+  "thumbnailUrl": zod.string().url().nullable(),
+  "subscriberCount": zod.number().int().nullable(),
+  "viewCount": zod.number().int().nullable(),
+  "videoCount": zod.number().int().nullable(),
+  "averageRecentViews": zod.number().nullable(),
+  "averageViewsSampleSize": zod.number().int(),
+  "retrievedAt": zod.coerce.date()
+}),zod.null()]),
+  "trendAnalysis": zod.union([zod.object({
+  "summary": zod.string(),
+  "frequentTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "risingTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedFormats": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "commonHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "lengthPatterns": zod.array(zod.string()),
+  "titleStructures": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "audienceInterests": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "analysisLabel": zod.string()
+}),zod.null()]),
+  "channelAnalysis": zod.union([zod.object({
+  "summary": zod.string(),
+  "strengths": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedPatterns": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "strongHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "weaknesses": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityReminder": zod.string()
+}),zod.null()]),
+  "opportunities": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "topic": zod.string(),
+  "evidence": zod.string(),
+  "whyInteresting": zod.string(),
+  "competitionLevel": zod.enum(['LOW', 'MEDIUM', 'HIGH', 'UNKNOWN']),
+  "suggestedFormat": zod.string(),
+  "suggestedHook": zod.string(),
+  "potentialScore": zod.number().int().min(researchChannelResponseOpportunitiesItemPotentialScoreMin).max(researchChannelResponseOpportunitiesItemPotentialScoreMax),
+  "scoreReason": zod.string(),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH']),
+  "originalityConsiderations": zod.array(zod.string()),
+  "sourceVideos": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "videoId": zod.string().nullable(),
+  "title": zod.string(),
+  "channelId": zod.string().nullable(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "url": zod.string().url(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})),
+  "scoreLabel": zod.string()
+}))
+})
+
+
+/**
+ * @summary Analyze a saved search using only its real YouTube results
+ */
+export const AnalyzeResearchSessionParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const AnalyzeResearchSessionResponse = zod.object({
+  "summary": zod.string(),
+  "frequentTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "risingTopics": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedFormats": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "commonHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "lengthPatterns": zod.array(zod.string()),
+  "titleStructures": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "audienceInterests": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "analysisLabel": zod.string()
+})
+
+
+/**
+ * @summary Generate original content opportunities from saved YouTube results
+ */
+export const GenerateResearchOpportunitiesParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const generateResearchOpportunitiesResponsePotentialScoreMin = 0;
+export const generateResearchOpportunitiesResponsePotentialScoreMax = 100;
+
+
+
+export const GenerateResearchOpportunitiesResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "sessionId": zod.string().uuid(),
+  "topic": zod.string(),
+  "evidence": zod.string(),
+  "whyInteresting": zod.string(),
+  "competitionLevel": zod.enum(['LOW', 'MEDIUM', 'HIGH', 'UNKNOWN']),
+  "suggestedFormat": zod.string(),
+  "suggestedHook": zod.string(),
+  "potentialScore": zod.number().int().min(generateResearchOpportunitiesResponsePotentialScoreMin).max(generateResearchOpportunitiesResponsePotentialScoreMax),
+  "scoreReason": zod.string(),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH']),
+  "originalityConsiderations": zod.array(zod.string()),
+  "sourceVideos": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "videoId": zod.string().nullable(),
+  "title": zod.string(),
+  "channelId": zod.string().nullable(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "url": zod.string().url(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})),
+  "scoreLabel": zod.string()
+})
+export const GenerateResearchOpportunitiesResponse = zod.array(GenerateResearchOpportunitiesResponseItem)
+
+
+/**
+ * @summary Analyze a researched channel for patterns and original opportunities
+ */
+export const AnalyzeResearchChannelParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const AnalyzeResearchChannelResponse = zod.object({
+  "summary": zod.string(),
+  "strengths": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "repeatedPatterns": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "strongHooks": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "weaknesses": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "contentGaps": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityOpportunities": zod.array(zod.object({
+  "insight": zod.string(),
+  "evidence": zod.string(),
+  "sourceVideoIds": zod.array(zod.string()),
+  "confidence": zod.enum(['LOW', 'MEDIUM', 'HIGH'])
+})),
+  "originalityReminder": zod.string()
+})
+
+
+/**
+ * @summary Create a normal Ideas-library record from a saved video or opportunity
+ */
+export const CreateIdeaFromResearchBody = zod.object({
+  "sessionId": zod.string().uuid(),
+  "sourceType": zod.enum(['VIDEO', 'OPPORTUNITY']),
+  "sourceId": zod.string().uuid()
+})
+
+export const createIdeaFromResearchResponseViralScoreMin = 0;
+export const createIdeaFromResearchResponseViralScoreMax = 100;
+
+export const createIdeaFromResearchResponseOriginalityScoreMin = 0;
+export const createIdeaFromResearchResponseOriginalityScoreMax = 100;
+
+export const createIdeaFromResearchResponseOpportunityScoreMin = 0;
+export const createIdeaFromResearchResponseOpportunityScoreMax = 100;
+
+
+
+export const CreateIdeaFromResearchResponse = zod.object({
+  "id": zod.string().uuid(),
+  "title": zod.string(),
+  "topic": zod.string(),
+  "hook": zod.string(),
+  "description": zod.string(),
+  "targetAudience": zod.string(),
+  "format": zod.string(),
+  "estimatedDuration": zod.number().int(),
+  "viralScore": zod.number().int().min(createIdeaFromResearchResponseViralScoreMin).max(createIdeaFromResearchResponseViralScoreMax).nullable(),
+  "originalityScore": zod.number().int().min(createIdeaFromResearchResponseOriginalityScoreMin).max(createIdeaFromResearchResponseOriginalityScoreMax).nullable(),
+  "rationale": zod.string().nullable(),
+  "weaknesses": zod.array(zod.string()),
+  "improvements": zod.array(zod.string()),
+  "opportunityScore": zod.number().int().min(createIdeaFromResearchResponseOpportunityScoreMin).max(createIdeaFromResearchResponseOpportunityScoreMax).nullable(),
+  "researchEvidence": zod.string().nullable(),
+  "originalityConsiderations": zod.array(zod.string()),
+  "source": zod.enum(['MANUAL', 'STRATEGIST', 'RESEARCH']),
+  "status": zod.enum(['NEW', 'RESEARCHING', 'APPROVED', 'REJECTED', 'SCRIPTING', 'READY']),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get the real YouTube sources attached to an idea
+ */
+export const GetIdeaResearchSourcesParams = zod.object({
+  "id": zod.coerce.string().uuid()
+})
+
+export const GetIdeaResearchSourcesResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "videoId": zod.string().nullable(),
+  "title": zod.string(),
+  "channelId": zod.string().nullable(),
+  "channelTitle": zod.string(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "url": zod.string().url(),
+  "viewCount": zod.number().int().nullable(),
+  "likeCount": zod.number().int().nullable(),
+  "commentCount": zod.number().int().nullable(),
+  "dataSource": zod.string(),
+  "retrievedAt": zod.coerce.date()
+})
+export const GetIdeaResearchSourcesResponse = zod.array(GetIdeaResearchSourcesResponseItem)
 
 
 /**
@@ -451,6 +1527,9 @@ export const getProjectResponseIdeaViralScoreMax = 100;
 export const getProjectResponseIdeaOriginalityScoreMin = 0;
 export const getProjectResponseIdeaOriginalityScoreMax = 100;
 
+export const getProjectResponseIdeaOpportunityScoreMin = 0;
+export const getProjectResponseIdeaOpportunityScoreMax = 100;
+
 
 
 
@@ -479,7 +1558,10 @@ export const GetProjectResponse = zod.object({
   "rationale": zod.string().nullable(),
   "weaknesses": zod.array(zod.string()),
   "improvements": zod.array(zod.string()),
-  "source": zod.enum(['MANUAL', 'STRATEGIST']),
+  "opportunityScore": zod.number().int().min(getProjectResponseIdeaOpportunityScoreMin).max(getProjectResponseIdeaOpportunityScoreMax).nullable(),
+  "researchEvidence": zod.string().nullable(),
+  "originalityConsiderations": zod.array(zod.string()),
+  "source": zod.enum(['MANUAL', 'STRATEGIST', 'RESEARCH']),
   "status": zod.enum(['NEW', 'RESEARCHING', 'APPROVED', 'REJECTED', 'SCRIPTING', 'READY']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()

@@ -23,9 +23,14 @@ import type {
   AIUnavailableResponse,
   AnalyzeIdeaInput,
   BadRequestResponse,
+  ChannelAnalysis,
+  ChannelResearchInput,
   ConflictResponse,
+  ContentOpportunity,
   ContentProject,
+  CreateResearchIdeaInput,
   DashboardSummary,
+  ExternalServiceErrorResponse,
   GenerateIdeasInput,
   GenerateScriptInput,
   HealthStatus,
@@ -40,9 +45,16 @@ import type {
   ProjectInput,
   ProjectStatusUpdate,
   ProjectUpdate,
+  ResearchSearchInput,
+  ResearchSession,
+  ResearchSessionDetail,
+  ResearchSource,
+  ResearchStatus,
   ScriptUpdate,
   ShortsScript,
-  StrategistAnalysis
+  StrategistAnalysis,
+  TrendAnalysis,
+  TrendingResearchInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -814,6 +826,888 @@ export const useAnalyzeIdea = <TError = ErrorType<BadRequestResponse | AIUnavail
       > => {
       return useMutation(getAnalyzeIdeaMutationOptions(options));
     }
+
+export const getGetResearchStatusUrl = () => {
+
+
+
+
+  return `/api/research/status`
+}
+
+/**
+ * @summary Check research provider availability
+ */
+export const getResearchStatus = async ( options?: Parameters<typeof customFetch>[1]): Promise<ResearchStatus> => {
+
+  return customFetch<ResearchStatus>(getGetResearchStatusUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetResearchStatusQueryKey = () => {
+    return [
+    `/api/research/status`
+    ] as const;
+    }
+
+
+export const getGetResearchStatusQueryOptions = <TData = Awaited<ReturnType<typeof getResearchStatus>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getResearchStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetResearchStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getResearchStatus>>> = ({ signal }) => getResearchStatus({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getResearchStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetResearchStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getResearchStatus>>>
+export type GetResearchStatusQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Check research provider availability
+ */
+
+export function useGetResearchStatus<TData = Awaited<ReturnType<typeof getResearchStatus>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getResearchStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetResearchStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListResearchSessionsUrl = () => {
+
+
+
+
+  return `/api/research/sessions`
+}
+
+/**
+ * @summary List recent research sessions
+ */
+export const listResearchSessions = async ( options?: Parameters<typeof customFetch>[1]): Promise<ResearchSession[]> => {
+
+  return customFetch<ResearchSession[]>(getListResearchSessionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListResearchSessionsQueryKey = () => {
+    return [
+    `/api/research/sessions`
+    ] as const;
+    }
+
+
+export const getListResearchSessionsQueryOptions = <TData = Awaited<ReturnType<typeof listResearchSessions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listResearchSessions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListResearchSessionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listResearchSessions>>> = ({ signal }) => listResearchSessions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listResearchSessions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListResearchSessionsQueryResult = NonNullable<Awaited<ReturnType<typeof listResearchSessions>>>
+export type ListResearchSessionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List recent research sessions
+ */
+
+export function useListResearchSessions<TData = Awaited<ReturnType<typeof listResearchSessions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listResearchSessions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListResearchSessionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetResearchSessionUrl = (id: string,) => {
+
+
+
+
+  return `/api/research/sessions/${id}`
+}
+
+/**
+ * @summary Open a saved research session
+ */
+export const getResearchSession = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<ResearchSessionDetail> => {
+
+  return customFetch<ResearchSessionDetail>(getGetResearchSessionUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetResearchSessionQueryKey = (id: string,) => {
+    return [
+    `/api/research/sessions/${id}`
+    ] as const;
+    }
+
+
+export const getGetResearchSessionQueryOptions = <TData = Awaited<ReturnType<typeof getResearchSession>>, TError = ErrorType<NotFoundResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getResearchSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetResearchSessionQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getResearchSession>>> = ({ signal }) => getResearchSession(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getResearchSession>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetResearchSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getResearchSession>>>
+export type GetResearchSessionQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Open a saved research session
+ */
+
+export function useGetResearchSession<TData = Awaited<ReturnType<typeof getResearchSession>>, TError = ErrorType<NotFoundResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getResearchSession>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetResearchSessionQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSearchResearchUrl = () => {
+
+
+
+
+  return `/api/research/search`
+}
+
+/**
+ * @summary Search real YouTube videos and save a research session
+ */
+export const searchResearch = async (researchSearchInput: ResearchSearchInput, options?: Parameters<typeof customFetch>[1]): Promise<ResearchSessionDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ResearchSessionDetail>(getSearchResearchUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(researchSearchInput)
+  }
+);}
+
+
+
+
+
+export const getSearchResearchMutationKey = () => ['searchResearch'] as const;
+
+export const getSearchResearchMutationOptions = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof searchResearch>>, TError,SearchResearchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof searchResearch>>, TError,SearchResearchMutationVariables, TContext> => {
+
+const mutationKey = getSearchResearchMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof searchResearch>>, SearchResearchMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  searchResearch(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SearchResearchMutationResult = NonNullable<Awaited<ReturnType<typeof searchResearch>>>
+    export type SearchResearchMutationBody = BodyType<ResearchSearchInput>
+    export type SearchResearchMutationError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>
+    export type SearchResearchMutationVariables = {data: BodyType<ResearchSearchInput>}
+
+    /**
+ * @summary Search real YouTube videos and save a research session
+ */
+export const useSearchResearch = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof searchResearch>>, TError,SearchResearchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof searchResearch>>,
+        TError,
+        SearchResearchMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSearchResearchMutationOptions(options));
+    }
+
+export const getGetTrendingResearchUrl = () => {
+
+
+
+
+  return `/api/research/trending`
+}
+
+/**
+ * @summary Retrieve YouTube's real most-popular chart for a region
+ */
+export const getTrendingResearch = async (trendingResearchInput: TrendingResearchInput, options?: Parameters<typeof customFetch>[1]): Promise<ResearchSessionDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ResearchSessionDetail>(getGetTrendingResearchUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(trendingResearchInput)
+  }
+);}
+
+
+
+
+
+export const getGetTrendingResearchMutationKey = () => ['getTrendingResearch'] as const;
+
+export const getGetTrendingResearchMutationOptions = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getTrendingResearch>>, TError,GetTrendingResearchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof getTrendingResearch>>, TError,GetTrendingResearchMutationVariables, TContext> => {
+
+const mutationKey = getGetTrendingResearchMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof getTrendingResearch>>, GetTrendingResearchMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  getTrendingResearch(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GetTrendingResearchMutationResult = NonNullable<Awaited<ReturnType<typeof getTrendingResearch>>>
+    export type GetTrendingResearchMutationBody = BodyType<TrendingResearchInput>
+    export type GetTrendingResearchMutationError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>
+    export type GetTrendingResearchMutationVariables = {data: BodyType<TrendingResearchInput>}
+
+    /**
+ * @summary Retrieve YouTube's real most-popular chart for a region
+ */
+export const useGetTrendingResearch = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getTrendingResearch>>, TError,GetTrendingResearchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof getTrendingResearch>>,
+        TError,
+        GetTrendingResearchMutationVariables,
+        TContext
+      > => {
+      return useMutation(getGetTrendingResearchMutationOptions(options));
+    }
+
+export const getResearchChannelUrl = () => {
+
+
+
+
+  return `/api/research/channels`
+}
+
+/**
+ * @summary Fetch a channel and its recent public videos
+ */
+export const researchChannel = async (channelResearchInput: ChannelResearchInput, options?: Parameters<typeof customFetch>[1]): Promise<ResearchSessionDetail> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ResearchSessionDetail>(getResearchChannelUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(channelResearchInput)
+  }
+);}
+
+
+
+
+
+export const getResearchChannelMutationKey = () => ['researchChannel'] as const;
+
+export const getResearchChannelMutationOptions = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof researchChannel>>, TError,ResearchChannelMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof researchChannel>>, TError,ResearchChannelMutationVariables, TContext> => {
+
+const mutationKey = getResearchChannelMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof researchChannel>>, ResearchChannelMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  researchChannel(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResearchChannelMutationResult = NonNullable<Awaited<ReturnType<typeof researchChannel>>>
+    export type ResearchChannelMutationBody = BodyType<ChannelResearchInput>
+    export type ResearchChannelMutationError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>
+    export type ResearchChannelMutationVariables = {data: BodyType<ChannelResearchInput>}
+
+    /**
+ * @summary Fetch a channel and its recent public videos
+ */
+export const useResearchChannel = <TError = ErrorType<BadRequestResponse | ExternalServiceErrorResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof researchChannel>>, TError,ResearchChannelMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof researchChannel>>,
+        TError,
+        ResearchChannelMutationVariables,
+        TContext
+      > => {
+      return useMutation(getResearchChannelMutationOptions(options));
+    }
+
+export const getAnalyzeResearchSessionUrl = (id: string,) => {
+
+
+
+
+  return `/api/research/sessions/${id}/analyze`
+}
+
+/**
+ * @summary Analyze a saved search using only its real YouTube results
+ */
+export const analyzeResearchSession = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<TrendAnalysis> => {
+
+  return customFetch<TrendAnalysis>(getAnalyzeResearchSessionUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAnalyzeResearchSessionMutationKey = () => ['analyzeResearchSession'] as const;
+
+export const getAnalyzeResearchSessionMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeResearchSession>>, TError,AnalyzeResearchSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof analyzeResearchSession>>, TError,AnalyzeResearchSessionMutationVariables, TContext> => {
+
+const mutationKey = getAnalyzeResearchSessionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof analyzeResearchSession>>, AnalyzeResearchSessionMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  analyzeResearchSession(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AnalyzeResearchSessionMutationResult = NonNullable<Awaited<ReturnType<typeof analyzeResearchSession>>>
+
+    export type AnalyzeResearchSessionMutationError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>
+    export type AnalyzeResearchSessionMutationVariables = {id: string}
+
+    /**
+ * @summary Analyze a saved search using only its real YouTube results
+ */
+export const useAnalyzeResearchSession = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeResearchSession>>, TError,AnalyzeResearchSessionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof analyzeResearchSession>>,
+        TError,
+        AnalyzeResearchSessionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAnalyzeResearchSessionMutationOptions(options));
+    }
+
+export const getGenerateResearchOpportunitiesUrl = (id: string,) => {
+
+
+
+
+  return `/api/research/sessions/${id}/opportunities`
+}
+
+/**
+ * @summary Generate original content opportunities from saved YouTube results
+ */
+export const generateResearchOpportunities = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<ContentOpportunity[]> => {
+
+  return customFetch<ContentOpportunity[]>(getGenerateResearchOpportunitiesUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getGenerateResearchOpportunitiesMutationKey = () => ['generateResearchOpportunities'] as const;
+
+export const getGenerateResearchOpportunitiesMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateResearchOpportunities>>, TError,GenerateResearchOpportunitiesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateResearchOpportunities>>, TError,GenerateResearchOpportunitiesMutationVariables, TContext> => {
+
+const mutationKey = getGenerateResearchOpportunitiesMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateResearchOpportunities>>, GenerateResearchOpportunitiesMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  generateResearchOpportunities(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GenerateResearchOpportunitiesMutationResult = NonNullable<Awaited<ReturnType<typeof generateResearchOpportunities>>>
+
+    export type GenerateResearchOpportunitiesMutationError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>
+    export type GenerateResearchOpportunitiesMutationVariables = {id: string}
+
+    /**
+ * @summary Generate original content opportunities from saved YouTube results
+ */
+export const useGenerateResearchOpportunities = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateResearchOpportunities>>, TError,GenerateResearchOpportunitiesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof generateResearchOpportunities>>,
+        TError,
+        GenerateResearchOpportunitiesMutationVariables,
+        TContext
+      > => {
+      return useMutation(getGenerateResearchOpportunitiesMutationOptions(options));
+    }
+
+export const getAnalyzeResearchChannelUrl = (id: string,) => {
+
+
+
+
+  return `/api/research/channels/${id}/analyze`
+}
+
+/**
+ * @summary Analyze a researched channel for patterns and original opportunities
+ */
+export const analyzeResearchChannel = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<ChannelAnalysis> => {
+
+  return customFetch<ChannelAnalysis>(getAnalyzeResearchChannelUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAnalyzeResearchChannelMutationKey = () => ['analyzeResearchChannel'] as const;
+
+export const getAnalyzeResearchChannelMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeResearchChannel>>, TError,AnalyzeResearchChannelMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof analyzeResearchChannel>>, TError,AnalyzeResearchChannelMutationVariables, TContext> => {
+
+const mutationKey = getAnalyzeResearchChannelMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof analyzeResearchChannel>>, AnalyzeResearchChannelMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  analyzeResearchChannel(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AnalyzeResearchChannelMutationResult = NonNullable<Awaited<ReturnType<typeof analyzeResearchChannel>>>
+
+    export type AnalyzeResearchChannelMutationError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>
+    export type AnalyzeResearchChannelMutationVariables = {id: string}
+
+    /**
+ * @summary Analyze a researched channel for patterns and original opportunities
+ */
+export const useAnalyzeResearchChannel = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof analyzeResearchChannel>>, TError,AnalyzeResearchChannelMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof analyzeResearchChannel>>,
+        TError,
+        AnalyzeResearchChannelMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAnalyzeResearchChannelMutationOptions(options));
+    }
+
+export const getCreateIdeaFromResearchUrl = () => {
+
+
+
+
+  return `/api/research/create-idea`
+}
+
+/**
+ * @summary Create a normal Ideas-library record from a saved video or opportunity
+ */
+export const createIdeaFromResearch = async (createResearchIdeaInput: CreateResearchIdeaInput, options?: Parameters<typeof customFetch>[1]): Promise<Idea> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Idea>(getCreateIdeaFromResearchUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(createResearchIdeaInput)
+  }
+);}
+
+
+
+
+
+export const getCreateIdeaFromResearchMutationKey = () => ['createIdeaFromResearch'] as const;
+
+export const getCreateIdeaFromResearchMutationOptions = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createIdeaFromResearch>>, TError,CreateIdeaFromResearchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createIdeaFromResearch>>, TError,CreateIdeaFromResearchMutationVariables, TContext> => {
+
+const mutationKey = getCreateIdeaFromResearchMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createIdeaFromResearch>>, CreateIdeaFromResearchMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createIdeaFromResearch(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateIdeaFromResearchMutationResult = NonNullable<Awaited<ReturnType<typeof createIdeaFromResearch>>>
+    export type CreateIdeaFromResearchMutationBody = BodyType<CreateResearchIdeaInput>
+    export type CreateIdeaFromResearchMutationError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>
+    export type CreateIdeaFromResearchMutationVariables = {data: BodyType<CreateResearchIdeaInput>}
+
+    /**
+ * @summary Create a normal Ideas-library record from a saved video or opportunity
+ */
+export const useCreateIdeaFromResearch = <TError = ErrorType<BadRequestResponse | NotFoundResponse | AIUnavailableResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createIdeaFromResearch>>, TError,CreateIdeaFromResearchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createIdeaFromResearch>>,
+        TError,
+        CreateIdeaFromResearchMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateIdeaFromResearchMutationOptions(options));
+    }
+
+export const getGetIdeaResearchSourcesUrl = (id: string,) => {
+
+
+
+
+  return `/api/ideas/${id}/research-sources`
+}
+
+/**
+ * @summary Get the real YouTube sources attached to an idea
+ */
+export const getIdeaResearchSources = async (id: string, options?: Parameters<typeof customFetch>[1]): Promise<ResearchSource[]> => {
+
+  return customFetch<ResearchSource[]>(getGetIdeaResearchSourcesUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIdeaResearchSourcesQueryKey = (id: string,) => {
+    return [
+    `/api/ideas/${id}/research-sources`
+    ] as const;
+    }
+
+
+export const getGetIdeaResearchSourcesQueryOptions = <TData = Awaited<ReturnType<typeof getIdeaResearchSources>>, TError = ErrorType<NotFoundResponse>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIdeaResearchSources>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIdeaResearchSourcesQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIdeaResearchSources>>> = ({ signal }) => getIdeaResearchSources(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIdeaResearchSources>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIdeaResearchSourcesQueryResult = NonNullable<Awaited<ReturnType<typeof getIdeaResearchSources>>>
+export type GetIdeaResearchSourcesQueryError = ErrorType<NotFoundResponse>
+
+
+/**
+ * @summary Get the real YouTube sources attached to an idea
+ */
+
+export function useGetIdeaResearchSources<TData = Awaited<ReturnType<typeof getIdeaResearchSources>>, TError = ErrorType<NotFoundResponse>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIdeaResearchSources>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIdeaResearchSourcesQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getListProjectsUrl = (params?: ListProjectsParams,) => {
   const normalizedParams = new URLSearchParams();

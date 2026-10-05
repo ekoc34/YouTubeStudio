@@ -14,6 +14,8 @@ tags:
     description: YouTube content ideas
   - name: strategist
     description: AI-assisted YouTube content strategy
+  - name: research
+    description: YouTube research and evidence-backed content opportunities
   - name: projects
     description: Content production projects
   - name: scripts
@@ -186,6 +188,249 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "503":
           $ref: "#/components/responses/AIUnavailable"
+  /research/status:
+    get:
+      operationId: getResearchStatus
+      tags: [research]
+      summary: Check research provider availability
+      responses:
+        "200":
+          description: Provider configuration status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchStatus"
+  /research/sessions:
+    get:
+      operationId: listResearchSessions
+      tags: [research]
+      summary: List recent research sessions
+      responses:
+        "200":
+          description: Research history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResearchSession"
+  /research/sessions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getResearchSession
+      tags: [research]
+      summary: Open a saved research session
+      responses:
+        "200":
+          description: Saved session, real video records, analysis, and opportunities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchSessionDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /research/search:
+    post:
+      operationId: searchResearch
+      tags: [research]
+      summary: Search real YouTube videos and save a research session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResearchSearchInput"
+      responses:
+        "201":
+          description: Completed research search and its real results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchSessionDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "502":
+          $ref: "#/components/responses/ExternalServiceError"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /research/trending:
+    post:
+      operationId: getTrendingResearch
+      tags: [research]
+      summary: Retrieve YouTube's real most-popular chart for a region
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrendingResearchInput"
+      responses:
+        "201":
+          description: Saved real chart results; chart rank is not a growth trend
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchSessionDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "502":
+          $ref: "#/components/responses/ExternalServiceError"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /research/channels:
+    post:
+      operationId: researchChannel
+      tags: [research]
+      summary: Fetch a channel and its recent public videos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChannelResearchInput"
+      responses:
+        "201":
+          description: Saved channel research session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResearchSessionDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "502":
+          $ref: "#/components/responses/ExternalServiceError"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /research/sessions/{id}/analyze:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: analyzeResearchSession
+      tags: [research]
+      summary: Analyze a saved search using only its real YouTube results
+      responses:
+        "200":
+          description: Evidence-linked AI analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrendAnalysis"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /research/sessions/{id}/opportunities:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: generateResearchOpportunities
+      tags: [research]
+      summary: Generate original content opportunities from saved YouTube results
+      responses:
+        "200":
+          description: Opportunities with real source-video evidence and AI estimates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContentOpportunity"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /research/channels/{id}/analyze:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: analyzeResearchChannel
+      tags: [research]
+      summary: Analyze a researched channel for patterns and original opportunities
+      responses:
+        "200":
+          description: Evidence-linked channel analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChannelAnalysis"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /research/create-idea:
+    post:
+      operationId: createIdeaFromResearch
+      tags: [research]
+      summary: Create a normal Ideas-library record from a saved video or opportunity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateResearchIdeaInput"
+      responses:
+        "201":
+          description: Idea saved to the existing Ideas library with research provenance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Idea"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/AIUnavailable"
+  /ideas/{id}/research-sources:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getIdeaResearchSources
+      tags: [ideas]
+      summary: Get the real YouTube sources attached to an idea
+      responses:
+        "200":
+          description: Sources preserved with the idea
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResearchSource"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /projects:
     get:
       operationId: listProjects
@@ -445,6 +690,12 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+    ExternalServiceError:
+      description: YouTube Data API request failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
     HealthStatus:
       type: object
@@ -464,7 +715,7 @@ components:
       enum: [NEW, RESEARCHING, APPROVED, REJECTED, SCRIPTING, READY]
     IdeaSource:
       type: string
-      enum: [MANUAL, STRATEGIST]
+      enum: [MANUAL, STRATEGIST, RESEARCH]
     ProjectStatus:
       type: string
       enum:
@@ -503,6 +754,11 @@ components:
         improvements:
           type: array
           items: { type: string }
+        opportunityScore: { type: ["integer", "null"], minimum: 0, maximum: 100 }
+        researchEvidence: { type: ["string", "null"] }
+        originalityConsiderations:
+          type: array
+          items: { type: string }
         source:
           $ref: "#/components/schemas/IdeaSource"
         status:
@@ -523,6 +779,9 @@ components:
         - rationale
         - weaknesses
         - improvements
+        - opportunityScore
+        - researchEvidence
+        - originalityConsiderations
         - source
         - status
         - createdAt
@@ -568,6 +827,243 @@ components:
         targetAudience: { type: string, maxLength: 240 }
         format: { type: string, maxLength: 100 }
         estimatedDuration: { type: integer, minimum: 10, maximum: 180 }
+    ResearchStatus:
+      type: object
+      properties:
+        youtubeConfigured: { type: boolean }
+        aiConfigured: { type: boolean }
+      required: [youtubeConfigured, aiConfigured]
+    ResearchSessionKind:
+      type: string
+      enum: [SEARCH, POPULAR, CHANNEL]
+    ResearchStatusValue:
+      type: string
+      enum: [RUNNING, COMPLETED, FAILED]
+    ResearchFilters:
+      type: object
+      properties:
+        language: { type: ["string", "null"] }
+        region: { type: ["string", "null"] }
+        contentType:
+          type: string
+          enum: [SHORTS, LONG_FORM, BOTH]
+        timeRange:
+          type: string
+          enum: [TODAY, WEEK, MONTH, CUSTOM, ALL_TIME]
+        startDate: { type: ["string", "null"], format: date }
+        endDate: { type: ["string", "null"], format: date }
+      required: [language, region, contentType, timeRange, startDate, endDate]
+    ResearchSession:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        kind: { $ref: "#/components/schemas/ResearchSessionKind" }
+        query: { type: string }
+        filters: { $ref: "#/components/schemas/ResearchFilters" }
+        status: { $ref: "#/components/schemas/ResearchStatusValue" }
+        resultCount: { type: integer }
+        dataSource: { type: string }
+        errorMessage: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        retrievedAt: { type: ["string", "null"], format: date-time }
+      required: [id, kind, query, filters, status, resultCount, dataSource, errorMessage, createdAt, retrievedAt]
+    ResearchVideo:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sessionId: { type: string, format: uuid }
+        videoId: { type: string }
+        title: { type: string }
+        channelId: { type: string }
+        channelTitle: { type: string }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        durationSeconds: { type: ["integer", "null"] }
+        url: { type: string, format: uri }
+        thumbnailUrl: { type: ["string", "null"], format: uri }
+        viewCount: { type: ["integer", "null"] }
+        likeCount: { type: ["integer", "null"] }
+        commentCount: { type: ["integer", "null"] }
+        dataSource: { type: string }
+        retrievedAt: { type: string, format: date-time }
+      required: [id, sessionId, videoId, title, channelId, channelTitle, publishedAt, durationSeconds, url, thumbnailUrl, viewCount, likeCount, commentCount, dataSource, retrievedAt]
+    ResearchChannel:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sessionId: { type: string, format: uuid }
+        channelId: { type: string }
+        title: { type: string }
+        description: { type: ["string", "null"] }
+        customUrl: { type: ["string", "null"] }
+        thumbnailUrl: { type: ["string", "null"], format: uri }
+        subscriberCount: { type: ["integer", "null"] }
+        viewCount: { type: ["integer", "null"] }
+        videoCount: { type: ["integer", "null"] }
+        averageRecentViews: { type: ["number", "null"] }
+        averageViewsSampleSize: { type: integer }
+        retrievedAt: { type: string, format: date-time }
+      required: [id, sessionId, channelId, title, description, customUrl, thumbnailUrl, subscriberCount, viewCount, videoCount, averageRecentViews, averageViewsSampleSize, retrievedAt]
+    Confidence:
+      type: string
+      enum: [LOW, MEDIUM, HIGH]
+    EvidenceFinding:
+      type: object
+      properties:
+        insight: { type: string }
+        evidence: { type: string }
+        sourceVideoIds:
+          type: array
+          items: { type: string }
+        confidence: { $ref: "#/components/schemas/Confidence" }
+      required: [insight, evidence, sourceVideoIds, confidence]
+    TrendAnalysis:
+      type: object
+      properties:
+        summary: { type: string }
+        frequentTopics:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        risingTopics:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        repeatedFormats:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        commonHooks:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        lengthPatterns:
+          type: array
+          items: { type: string }
+        titleStructures:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        contentGaps:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        audienceInterests:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        originalOpportunities:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        analysisLabel: { type: string }
+      required: [summary, frequentTopics, risingTopics, repeatedFormats, commonHooks, lengthPatterns, titleStructures, contentGaps, audienceInterests, originalOpportunities, analysisLabel]
+    ChannelAnalysis:
+      type: object
+      properties:
+        summary: { type: string }
+        strengths:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        repeatedPatterns:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        strongHooks:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        weaknesses:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        contentGaps:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        originalityOpportunities:
+          type: array
+          items: { $ref: "#/components/schemas/EvidenceFinding" }
+        originalityReminder: { type: string }
+      required: [summary, strengths, repeatedPatterns, strongHooks, weaknesses, contentGaps, originalityOpportunities, originalityReminder]
+    ResearchSource:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        videoId: { type: ["string", "null"] }
+        title: { type: string }
+        channelId: { type: ["string", "null"] }
+        channelTitle: { type: string }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        url: { type: string, format: uri }
+        viewCount: { type: ["integer", "null"] }
+        likeCount: { type: ["integer", "null"] }
+        commentCount: { type: ["integer", "null"] }
+        dataSource: { type: string }
+        retrievedAt: { type: string, format: date-time }
+      required: [id, videoId, title, channelId, channelTitle, publishedAt, url, viewCount, likeCount, commentCount, dataSource, retrievedAt]
+    ContentOpportunity:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sessionId: { type: string, format: uuid }
+        topic: { type: string }
+        evidence: { type: string }
+        whyInteresting: { type: string }
+        competitionLevel:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, UNKNOWN]
+        suggestedFormat: { type: string }
+        suggestedHook: { type: string }
+        potentialScore: { type: integer, minimum: 0, maximum: 100 }
+        scoreReason: { type: string }
+        confidence: { $ref: "#/components/schemas/Confidence" }
+        originalityConsiderations:
+          type: array
+          items: { type: string }
+        sourceVideos:
+          type: array
+          items: { $ref: "#/components/schemas/ResearchSource" }
+        scoreLabel: { type: string }
+      required: [id, sessionId, topic, evidence, whyInteresting, competitionLevel, suggestedFormat, suggestedHook, potentialScore, scoreReason, confidence, originalityConsiderations, sourceVideos, scoreLabel]
+    ResearchSessionDetail:
+      type: object
+      properties:
+        session: { $ref: "#/components/schemas/ResearchSession" }
+        videos:
+          type: array
+          items: { $ref: "#/components/schemas/ResearchVideo" }
+        channel: { oneOf: [{ $ref: "#/components/schemas/ResearchChannel" }, { type: "null" }] }
+        trendAnalysis: { oneOf: [{ $ref: "#/components/schemas/TrendAnalysis" }, { type: "null" }] }
+        channelAnalysis: { oneOf: [{ $ref: "#/components/schemas/ChannelAnalysis" }, { type: "null" }] }
+        opportunities:
+          type: array
+          items: { $ref: "#/components/schemas/ContentOpportunity" }
+      required: [session, videos, channel, trendAnalysis, channelAnalysis, opportunities]
+    ResearchSearchInput:
+      type: object
+      properties:
+        query: { type: string, minLength: 1, maxLength: 200 }
+        language: { type: string, minLength: 2, maxLength: 10 }
+        region: { type: string, minLength: 2, maxLength: 2 }
+        contentType:
+          type: string
+          enum: [SHORTS, LONG_FORM, BOTH]
+        timeRange:
+          type: string
+          enum: [TODAY, WEEK, MONTH, CUSTOM]
+        startDate: { type: ["string", "null"], format: date }
+        endDate: { type: ["string", "null"], format: date }
+      required: [query, language, region, contentType, timeRange, startDate, endDate]
+    TrendingResearchInput:
+      type: object
+      properties:
+        region: { type: string, minLength: 2, maxLength: 2 }
+        contentType:
+          type: string
+          enum: [SHORTS, LONG_FORM, BOTH]
+      required: [region, contentType]
+    ChannelResearchInput:
+      type: object
+      properties:
+        channelUrlOrId: { type: string, minLength: 3, maxLength: 300 }
+      required: [channelUrlOrId]
+    CreateResearchIdeaInput:
+      type: object
+      properties:
+        sessionId: { type: string, format: uuid }
+        sourceType:
+          type: string
+          enum: [VIDEO, OPPORTUNITY]
+        sourceId: { type: string, format: uuid }
+      required: [sessionId, sourceType, sourceId]
     StrategistAnalysis:
       type: object
       properties:

@@ -31,6 +31,7 @@ export type IdeaSource = typeof IdeaSource[keyof typeof IdeaSource];
 export const IdeaSource = {
   MANUAL: 'MANUAL',
   STRATEGIST: 'STRATEGIST',
+  RESEARCH: 'RESEARCH',
 } as const;
 
 export type ProjectStatus = typeof ProjectStatus[keyof typeof ProjectStatus];
@@ -84,6 +85,15 @@ export interface Idea {
   rationale: string | null;
   weaknesses: string[];
   improvements: string[];
+  /**
+     * @minimum 0
+     * @maximum 100
+     * @nullable
+     */
+  opportunityScore: number | null;
+  /** @nullable */
+  researchEvidence: string | null;
+  originalityConsiderations: string[];
   source: IdeaSource;
   status: IdeaStatus;
   createdAt: string;
@@ -194,6 +204,309 @@ export interface AnalyzeIdeaInput {
      * @maximum 180
      */
   estimatedDuration?: number;
+}
+
+export interface ResearchStatus {
+  youtubeConfigured: boolean;
+  aiConfigured: boolean;
+}
+
+export type ResearchSessionKind = typeof ResearchSessionKind[keyof typeof ResearchSessionKind];
+
+
+export const ResearchSessionKind = {
+  SEARCH: 'SEARCH',
+  POPULAR: 'POPULAR',
+  CHANNEL: 'CHANNEL',
+} as const;
+
+export type ResearchStatusValue = typeof ResearchStatusValue[keyof typeof ResearchStatusValue];
+
+
+export const ResearchStatusValue = {
+  RUNNING: 'RUNNING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+} as const;
+
+export type ResearchFiltersContentType = typeof ResearchFiltersContentType[keyof typeof ResearchFiltersContentType];
+
+
+export const ResearchFiltersContentType = {
+  SHORTS: 'SHORTS',
+  LONG_FORM: 'LONG_FORM',
+  BOTH: 'BOTH',
+} as const;
+
+export type ResearchFiltersTimeRange = typeof ResearchFiltersTimeRange[keyof typeof ResearchFiltersTimeRange];
+
+
+export const ResearchFiltersTimeRange = {
+  TODAY: 'TODAY',
+  WEEK: 'WEEK',
+  MONTH: 'MONTH',
+  CUSTOM: 'CUSTOM',
+  ALL_TIME: 'ALL_TIME',
+} as const;
+
+export interface ResearchFilters {
+  /** @nullable */
+  language: string | null;
+  /** @nullable */
+  region: string | null;
+  contentType: ResearchFiltersContentType;
+  timeRange: ResearchFiltersTimeRange;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+}
+
+export interface ResearchSession {
+  id: string;
+  kind: ResearchSessionKind;
+  query: string;
+  filters: ResearchFilters;
+  status: ResearchStatusValue;
+  resultCount: number;
+  dataSource: string;
+  /** @nullable */
+  errorMessage: string | null;
+  createdAt: string;
+  /** @nullable */
+  retrievedAt: string | null;
+}
+
+export interface ResearchVideo {
+  id: string;
+  sessionId: string;
+  videoId: string;
+  title: string;
+  channelId: string;
+  channelTitle: string;
+  /** @nullable */
+  publishedAt: string | null;
+  /** @nullable */
+  durationSeconds: number | null;
+  url: string;
+  /** @nullable */
+  thumbnailUrl: string | null;
+  /** @nullable */
+  viewCount: number | null;
+  /** @nullable */
+  likeCount: number | null;
+  /** @nullable */
+  commentCount: number | null;
+  dataSource: string;
+  retrievedAt: string;
+}
+
+export interface ResearchChannel {
+  id: string;
+  sessionId: string;
+  channelId: string;
+  title: string;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  customUrl: string | null;
+  /** @nullable */
+  thumbnailUrl: string | null;
+  /** @nullable */
+  subscriberCount: number | null;
+  /** @nullable */
+  viewCount: number | null;
+  /** @nullable */
+  videoCount: number | null;
+  /** @nullable */
+  averageRecentViews: number | null;
+  averageViewsSampleSize: number;
+  retrievedAt: string;
+}
+
+export type Confidence = typeof Confidence[keyof typeof Confidence];
+
+
+export const Confidence = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+} as const;
+
+export interface EvidenceFinding {
+  insight: string;
+  evidence: string;
+  sourceVideoIds: string[];
+  confidence: Confidence;
+}
+
+export interface TrendAnalysis {
+  summary: string;
+  frequentTopics: EvidenceFinding[];
+  risingTopics: EvidenceFinding[];
+  repeatedFormats: EvidenceFinding[];
+  commonHooks: EvidenceFinding[];
+  lengthPatterns: string[];
+  titleStructures: EvidenceFinding[];
+  contentGaps: EvidenceFinding[];
+  audienceInterests: EvidenceFinding[];
+  originalOpportunities: EvidenceFinding[];
+  analysisLabel: string;
+}
+
+export interface ChannelAnalysis {
+  summary: string;
+  strengths: EvidenceFinding[];
+  repeatedPatterns: EvidenceFinding[];
+  strongHooks: EvidenceFinding[];
+  weaknesses: EvidenceFinding[];
+  contentGaps: EvidenceFinding[];
+  originalityOpportunities: EvidenceFinding[];
+  originalityReminder: string;
+}
+
+export interface ResearchSource {
+  id: string;
+  /** @nullable */
+  videoId: string | null;
+  title: string;
+  /** @nullable */
+  channelId: string | null;
+  channelTitle: string;
+  /** @nullable */
+  publishedAt: string | null;
+  url: string;
+  /** @nullable */
+  viewCount: number | null;
+  /** @nullable */
+  likeCount: number | null;
+  /** @nullable */
+  commentCount: number | null;
+  dataSource: string;
+  retrievedAt: string;
+}
+
+export type ContentOpportunityCompetitionLevel = typeof ContentOpportunityCompetitionLevel[keyof typeof ContentOpportunityCompetitionLevel];
+
+
+export const ContentOpportunityCompetitionLevel = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  UNKNOWN: 'UNKNOWN',
+} as const;
+
+export interface ContentOpportunity {
+  id: string;
+  sessionId: string;
+  topic: string;
+  evidence: string;
+  whyInteresting: string;
+  competitionLevel: ContentOpportunityCompetitionLevel;
+  suggestedFormat: string;
+  suggestedHook: string;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  potentialScore: number;
+  scoreReason: string;
+  confidence: Confidence;
+  originalityConsiderations: string[];
+  sourceVideos: ResearchSource[];
+  scoreLabel: string;
+}
+
+export interface ResearchSessionDetail {
+  session: ResearchSession;
+  videos: ResearchVideo[];
+  channel: ResearchChannel | null;
+  trendAnalysis: TrendAnalysis | null;
+  channelAnalysis: ChannelAnalysis | null;
+  opportunities: ContentOpportunity[];
+}
+
+export type ResearchSearchInputContentType = typeof ResearchSearchInputContentType[keyof typeof ResearchSearchInputContentType];
+
+
+export const ResearchSearchInputContentType = {
+  SHORTS: 'SHORTS',
+  LONG_FORM: 'LONG_FORM',
+  BOTH: 'BOTH',
+} as const;
+
+export type ResearchSearchInputTimeRange = typeof ResearchSearchInputTimeRange[keyof typeof ResearchSearchInputTimeRange];
+
+
+export const ResearchSearchInputTimeRange = {
+  TODAY: 'TODAY',
+  WEEK: 'WEEK',
+  MONTH: 'MONTH',
+  CUSTOM: 'CUSTOM',
+} as const;
+
+export interface ResearchSearchInput {
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  query: string;
+  /**
+     * @minLength 2
+     * @maxLength 10
+     */
+  language: string;
+  /**
+     * @minLength 2
+     * @maxLength 2
+     */
+  region: string;
+  contentType: ResearchSearchInputContentType;
+  timeRange: ResearchSearchInputTimeRange;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+}
+
+export type TrendingResearchInputContentType = typeof TrendingResearchInputContentType[keyof typeof TrendingResearchInputContentType];
+
+
+export const TrendingResearchInputContentType = {
+  SHORTS: 'SHORTS',
+  LONG_FORM: 'LONG_FORM',
+  BOTH: 'BOTH',
+} as const;
+
+export interface TrendingResearchInput {
+  /**
+     * @minLength 2
+     * @maxLength 2
+     */
+  region: string;
+  contentType: TrendingResearchInputContentType;
+}
+
+export interface ChannelResearchInput {
+  /**
+     * @minLength 3
+     * @maxLength 300
+     */
+  channelUrlOrId: string;
+}
+
+export type CreateResearchIdeaInputSourceType = typeof CreateResearchIdeaInputSourceType[keyof typeof CreateResearchIdeaInputSourceType];
+
+
+export const CreateResearchIdeaInputSourceType = {
+  VIDEO: 'VIDEO',
+  OPPORTUNITY: 'OPPORTUNITY',
+} as const;
+
+export interface CreateResearchIdeaInput {
+  sessionId: string;
+  sourceType: CreateResearchIdeaInputSourceType;
+  sourceId: string;
 }
 
 export interface StrategistAnalysis {
@@ -357,6 +670,11 @@ export type ConflictResponse = ErrorResponse;
  * The configured AI provider is unavailable
  */
 export type AIUnavailableResponse = ErrorResponse;
+
+/**
+ * YouTube Data API request failed
+ */
+export type ExternalServiceErrorResponse = ErrorResponse;
 
 export type ListIdeasParams = {
 status?: IdeaStatus;

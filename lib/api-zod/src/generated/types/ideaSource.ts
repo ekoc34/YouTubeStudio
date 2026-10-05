@@ -12,4 +12,5 @@ export type IdeaSource = typeof IdeaSource[keyof typeof IdeaSource];
 export const IdeaSource = {
   MANUAL: 'MANUAL',
   STRATEGIST: 'STRATEGIST',
+  RESEARCH: 'RESEARCH',
 } as const;

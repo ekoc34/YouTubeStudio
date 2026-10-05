@@ -33,6 +33,15 @@ export interface Idea {
   rationale: string | null;
   weaknesses: string[];
   improvements: string[];
+  /**
+     * @minimum 0
+     * @maximum 100
+     * @nullable
+     */
+  opportunityScore: number | null;
+  /** @nullable */
+  researchEvidence: string | null;
+  originalityConsiderations: string[];
   source: IdeaSource;
   status: IdeaStatus;
   createdAt: Date;
